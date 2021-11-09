@@ -6,7 +6,7 @@ from disnake import (
 from aiosqlite3 import connect 
 from os import getenv , listdir
 
-class Astro(Bot):
+class Veloc1ty(Bot):
     async def get_prefix_for_guild(
         self ,bot : Bot ,  message : Message
     ):
@@ -26,7 +26,7 @@ class Astro(Bot):
                 raise e
 
     async def on_ready(self):
-        print(f'BOT IS READY\nNAME : {astro.user}\nID : {astro.user.id}')
+        print(f'BOT IS READY\nNAME : {veloc1ty.user}\nID : {veloc1ty.user.id}')
         async with connect('database/prefixes.db') as database:
             async with database.cursor() as cursor:
                 await cursor.execute(
@@ -55,5 +55,5 @@ class Astro(Bot):
                 return when_mentioned_or(prefix[1])(bot , message)
             
         
-astro = Astro()
-astro.run(getenv('TOKEN'))
+veloc1ty = Veloc1ty()
+veloc1ty.run(getenv('TOKEN'))
