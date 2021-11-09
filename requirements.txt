@@ -1,0 +1,2 @@
+disnake>=2.2.1
+aiosqlite3~=0.3.0
