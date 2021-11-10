@@ -24,7 +24,7 @@ class Veloc1ty(Bot):
                 print(file , 'loaded')
             except Exception as e:
                 raise e
-
+    
     async def on_ready(self):
         print(f'BOT IS READY\nNAME : {veloc1ty.user}\nID : {veloc1ty.user.id}')
         async with connect('database/prefixes.db') as database:
