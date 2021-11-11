@@ -1,10 +1,12 @@
-from disnake.ext.commands import Bot  , when_mentioned_or
+from disnake.ext.commands import Bot  , when_mentioned_or , bot_has_permissions
 from disnake import (
     Message , 
-    Intents
+    Intents ,
+    AllowedMentions
 )
 from aiosqlite3 import connect 
 from os import getenv , listdir
+from time import time
 
 class Veloc1ty(Bot):
     async def get_prefix_for_guild(
@@ -16,14 +18,32 @@ class Veloc1ty(Bot):
         super().__init__(
             command_prefix=self.get_prefix_for_guild ,
             case_insensitive = True ,
-            intents = Intents.all()
+            intents = Intents.all() ,
+            strip_after_prefix = True ,
+            allowed_mentions = AllowedMentions(
+                everyone=False ,
+                replied_user=False ,
+                roles=False
+            )
         )
+        self.boot_time = time()
+        self.server_invite = ''
+        self.banner = 'https://i.imgur.com/kFiFzrC.jpg'
+        self.load_extension('jishaku')
         for file in ['general']:
             try : 
                 self.load_extension('cogs.'+file)
                 print(file , 'loaded')
             except Exception as e:
                 raise e
+    
+    async def add_emojis(self):
+        self.my_emojis = {
+            'wave' : self.get_emoji(898560210292068412) ,
+            'wave2' : self.get_emoji(892593887833653258) ,
+            'tick' : self.get_emoji(888120845749334016),
+            'cross' : self.get_emoji(888120623824515131)
+        }
     
     async def on_ready(self):
         print(f'BOT IS READY\nNAME : {veloc1ty.user}\nID : {veloc1ty.user.id}')
@@ -36,6 +56,11 @@ class Veloc1ty(Bot):
                     '''
                 )
                 await database.commit()
+        await self.add_emojis()
+        self.bot_owner = self.get_user(580034015759826944)
+        self.invite_url = f'https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=3691367512&scope=bot%20applications.commands'
+            
+        
 
     async def get_prefix_from_database(
         self , bot : Bot , message : Message
