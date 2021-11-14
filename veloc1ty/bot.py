@@ -1,11 +1,11 @@
-from disnake.ext.commands import Bot  , when_mentioned_or , bot_has_permissions
+from disnake.ext.commands import Bot  , when_mentioned_or 
 from disnake import (
     Message , 
     Intents ,
     AllowedMentions
 )
 from aiosqlite3 import connect 
-from os import getenv , listdir
+from os import getenv 
 from time import time
 
 class Veloc1ty(Bot):
@@ -20,6 +20,7 @@ class Veloc1ty(Bot):
             case_insensitive = True ,
             intents = Intents.all() ,
             strip_after_prefix = True ,
+            test_guilds = [int(getenv('MY_GUILD'))],
             allowed_mentions = AllowedMentions(
                 everyone=False ,
                 replied_user=False ,
@@ -27,10 +28,10 @@ class Veloc1ty(Bot):
             )
         )
         self.boot_time = time()
-        self.server_invite = ''
+        self.server_invite = 'PgmzbNbf37'
         self.banner = 'https://i.imgur.com/kFiFzrC.jpg'
         self.load_extension('jishaku')
-        for file in ['general']:
+        for file in ['general' , 'configs' , 'welcomer']:
             try : 
                 self.load_extension('cogs.'+file)
                 print(file , 'loaded')
@@ -41,8 +42,10 @@ class Veloc1ty(Bot):
         self.my_emojis = {
             'wave' : self.get_emoji(898560210292068412) ,
             'wave2' : self.get_emoji(892593887833653258) ,
-            'tick' : self.get_emoji(888120845749334016),
-            'cross' : self.get_emoji(888120623824515131)
+            'tick_static' : self.get_emoji(888120845749334016),
+            'cross_static' : self.get_emoji(888120623824515131),
+            'tick' : self.get_emoji(909105537587765279),
+            'cross' : self.get_emoji(909105779578126347)
         }
     
     async def on_ready(self):
