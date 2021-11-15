@@ -6,25 +6,30 @@ from . import (
     View
 )
 from time import monotonic , time
-from disnake.ext.commands import  command , bot_has_permissions
-from disnake import Color , Embed , ButtonStyle 
+from disnake.ext.commands import  command , bot_has_permissions , slash_command
+from disnake import Color , Embed , ButtonStyle
+from disnake import ApplicationCommandInteraction as SlashContext
 from datetime import timedelta
 
 class General_CMDS(Cog):
     '''
-    Basic Bot Commands 
+    Basic Bot Related Commands 
     '''
     
     @command(
         name = 'ping',
-        aliases = ['latency']
+        aliases = ['latency'] ,
+        description = 'Bot\'s websocket Latency in ms'
     )
     @bot_has_permissions(send_messages=True , embed_links = True , read_message_history=True)
     async def ping_command( self , ctx : Context ):
+        '''
+        Bot Latency
+        '''
         e = monotonic()
         msg = await ctx.reply(
             embed = Embed(
-                
+                title = f'{ctx.bot.my_emojis["wave2"]}\u200bPing !',
                 color = Color.blue()
             ).add_field(name='Bot Latency',value='```yaml\nCalc ms\n```').add_field(name='Script Latency',value='```yaml\nCalc ms\n```')
         )
@@ -37,10 +42,14 @@ class General_CMDS(Cog):
 
     @command(
         name = 'botinfo',
-        aliases=['about' , 'stats']
+        aliases=['about' , 'stats'] ,
+        description= 'Some basic info and stats about the Bot'
     )
     @bot_has_permissions(send_messages=True , embed_links = True , read_message_history=True)
     async def send_bot_info(self , ctx : Context):
+        '''
+        Developer info , stats and support for the bot
+        '''
         embed = Embed(
             color = Color.purple() ,
             description=F'''
@@ -69,6 +78,31 @@ Cached Users : {len(ctx.bot.users)}
             view.add_item(button)
         
         await ctx.reply(embed=embed , view=view)
+
+    @slash_command(
+        name='ping' ,
+        description='Bot\'s Latency'
+    )
+    async def send_ping(self , ctx  : SlashContext ):
+        '''
+        The bot's websocket Latency,
+        '''
+
+        e = monotonic()
+        await ctx.response.send_message(
+            ephemeral=True ,
+            embed = Embed(
+                title = f'{ctx.bot.my_emojis["wave2"]}\u200bPing !',
+                color = Color.blue()
+            ).add_field(name='Bot Latency',value='```yaml\nCalc ms\n```').add_field(name='Script Latency',value='```yaml\nCalc ms\n```')
+        )
+        await ctx.edit_original_message(
+            embed = Embed(
+                title = f"{ctx.bot.my_emojis['wave2']}\u200b Pong !" ,
+                color = Color.blue()
+            ).add_field(name='Bot Latency',value=f'```yaml\n{round(ctx.bot.latency*1000)}ms\n```').add_field(name='Script Latency',value=f'```yaml\n{round((monotonic()-e)*1000)}ms\n```')
+        )
+
        
    
     
