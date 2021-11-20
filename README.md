@@ -1,5 +1,5 @@
 
-# VELOC1TY
+# KAKASHI
 
 A Multipurpose Discord Bot written in [disnake](https://github.com/DisnakeDev/disnake) Python library
 
