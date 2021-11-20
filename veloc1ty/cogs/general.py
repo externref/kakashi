@@ -15,6 +15,8 @@ class General_CMDS(Cog):
     '''
     Basic Bot Related Commands 
     '''
+    def __init__(self , bot : Bot):
+        self.bot = bot
     
     @command(
         name = 'ping',
@@ -103,8 +105,14 @@ Cached Users : {len(ctx.bot.users)}
             ).add_field(name='Bot Latency',value=f'```yaml\n{round(ctx.bot.latency*1000)}ms\n```').add_field(name='Script Latency',value=f'```yaml\n{round((monotonic()-e)*1000)}ms\n```')
         )
 
-       
-   
+    @Cog.listener('on_message')
+    async def add_command_count(self , message):
+        try:
+            if message.content.startswith((await self.bot.get_prefix(message))[2]):
+                if self.bot.get_command((message.content[1::].split())[0]):
+                    self.bot.ran_commands += 1
+        except:
+            return
     
 def setup(bot : Bot):
     bot.add_cog(General_CMDS(bot))

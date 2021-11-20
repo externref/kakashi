@@ -1,3 +1,5 @@
+from disnake.ext.commands.core import has_permissions
+from disnake.interactions.application_command import ApplicationCommandInteraction
 from . import (
     Cog ,
     Button ,
@@ -5,9 +7,9 @@ from . import (
     Context , 
     View , 
 )
-from disnake.ext.commands import command , has_guild_permissions , bot_has_permissions
+from disnake.ext.commands import command , has_guild_permissions , bot_has_permissions , has_permissions ,slash_command
 from aiosqlite3 import connect
-from disnake import Embed ,Color
+from disnake import Embed ,Color, Option,OptionType
             
 class Configurations(Cog):
     '''
@@ -60,6 +62,51 @@ class Configurations(Cog):
                 color= Color.green()
             )
         )
+    
+    @command(
+        name= 'prefix-reset',
+        aliases = ['prefix-clear']
+    )
+    @has_guild_permissions(manage_guild=True)
+    @bot_has_permissions()
+    async def remove_prefix_for_guild(self , ctx : Context):
+        old_prefix = self.bot.get_prefix(ctx.message)
+        await DataBaseHandler.insert_or_update_prefix(ctx , '.')
+        await ctx.reply(
+            embed = Embed(
+                description=f'{self.bot.my_emojis["tick"]} Changed prefix back from `{old_prefix}` to `.`'
+            )
+        )
+
+    @slash_command(
+        name = 'prefix' ,
+        description='Change prefix for the server',
+        options = [
+            Option(name='newprefix' , description='The new prefix for the server',type=OptionType.string , required=True)
+        ]
+    )
+    async def change_prefix_slash(self , ctx : ApplicationCommandInteraction , newprefix : str):
+        '''
+        Change Bot\'s prefix for a guild
+        '''
+        if any([letter for letter in newprefix if letter in ['@' , '`' , '#']]):
+            return await ctx.response.send_message(
+                embed = Embed(
+                    description=f"{ctx.bot.my_emojis['cross']} Bot prefix Cannot contain \` , `@` or `#` characters due to discord markdown .",
+                    color = Color.red()
+                )
+            )
+        await DataBaseHandler.insert_or_update_prefix(ctx , newprefix)
+        await ctx.response.send_message(
+            embed = Embed(
+                description=f"{ctx.bot.my_emojis['tick']} Prefix has been set to `{newprefix}` , You can always change the prefix with `prefix-set` command ",
+                color= Color.green()
+            )
+        )
+        
+        
+
+
 class DataBaseHandler:
     async def get_prefix(ctx : Context):
         async with connect('database/prefixes.db') as database:

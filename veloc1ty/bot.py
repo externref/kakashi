@@ -28,6 +28,7 @@ class Veloc1ty(Bot):
             )
         )
         self.boot_time = time()
+        self.ran_commands = 0
         self.server_invite = 'PgmzbNbf37'
         self.banner = 'https://i.imgur.com/kFiFzrC.jpg'
         self.load_extension('jishaku')
@@ -47,6 +48,7 @@ class Veloc1ty(Bot):
             'tick' : self.get_emoji(909105537587765279),
             'cross' : self.get_emoji(909105779578126347)
         }
+
     
     async def on_ready(self):
         print(f'BOT IS READY\nNAME : {veloc1ty.user}\nID : {veloc1ty.user.id}')
@@ -64,10 +66,10 @@ class Veloc1ty(Bot):
         self.invite_url = f'https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=3691367512&scope=bot%20applications.commands'
             
         
-
     async def get_prefix_from_database(
         self , bot : Bot , message : Message
     ):
+        if not message.guild : return '.'
         async with connect('database/prefixes.db') as database:
             async with database.cursor() as cursor:
                 data = await cursor.execute(
@@ -79,9 +81,8 @@ class Veloc1ty(Bot):
                 ) 
                 prefix = data.fetchone()
                 if not prefix :
-                    return when_mentioned_or('+')(bot , message)
+                    return when_mentioned_or('.')(bot , message)
                 return when_mentioned_or(prefix[1])(bot , message)
             
-        
 veloc1ty = Veloc1ty()
 veloc1ty.run(getenv('TOKEN'))

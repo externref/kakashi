@@ -72,7 +72,7 @@ class Welcomer(Cog):
                 description= await self.process_message(message , ctx.author),
                 color = self.allowed_colors[str(data[3])],
                 
-            ).set_thumbnail(url =ctx.author.avatar.url or ctx.author.default_avatar.url)
+            ).set_thumbnail(url =ctx.author.avatar.url or ctx.author.default_avatar.url).set_author(name = str(ctx.author), icon_url=(ctx.author.avatar or ctx.author.default_avatar).url)
         )
 
 
