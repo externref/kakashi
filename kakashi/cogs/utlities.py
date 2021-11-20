@@ -1,8 +1,6 @@
 from typing import Optional, Union
 from disnake.app_commands import Option
 from disnake.enums import OptionType
-from disnake.ext.commands.core import group
-from disnake.ext.commands.slash_core import SubCommandGroup
 from . import (
     Cog ,
     Context ,
@@ -11,7 +9,7 @@ from . import (
 from disnake.ext.commands import command , has_permissions , bot_has_permissions , slash_command
 from disnake import Member , Role , Embed , Color, user
 
-class Utlities(Cog):
+class Utilities(Cog):
     def __init__(self , bot:Bot):
         self.bot = bot
         super().__init__()
@@ -114,4 +112,4 @@ class Utlities(Cog):
 
 
 def setup(bot : Bot):
-    bot.load_extension(Utlities(bot))
+    bot.load_extension(Utilities(bot))
