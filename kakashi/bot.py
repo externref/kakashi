@@ -8,7 +8,7 @@ from aiosqlite3 import connect
 from os import getenv 
 from time import time
 
-class Veloc1ty(Bot):
+class Kakashi(Bot):
     async def get_prefix_for_guild(
         self ,bot : Bot ,  message : Message
     ):
@@ -51,7 +51,7 @@ class Veloc1ty(Bot):
 
     
     async def on_ready(self):
-        print(f'BOT IS READY\nNAME : {veloc1ty.user}\nID : {veloc1ty.user.id}')
+        print(f'BOT IS READY\nNAME : {Kakashi.user}\nID : {Kakashi.user.id}')
         async with connect('database/prefixes.db') as database:
             async with database.cursor() as cursor:
                 await cursor.execute(
@@ -84,5 +84,5 @@ class Veloc1ty(Bot):
                     return when_mentioned_or('.')(bot , message)
                 return when_mentioned_or(prefix[1])(bot , message)
             
-veloc1ty = Veloc1ty()
-veloc1ty.run(getenv('TOKEN'))
+Kakashi = Kakashi()
+Kakashi.run(getenv('TOKEN'))
