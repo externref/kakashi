@@ -6,7 +6,8 @@ from . import (
     View,
     Bot    
 )
-from aiosqlite3 import connect
+from exts import EmbedColor
+from aiosqlite import connect
 from disnake import Color , Member , Embed , TextChannel 
 from disnake.ext.commands import command
 from typing import Union
@@ -36,7 +37,7 @@ class Welcomer(Cog):
     @command(
         name= 'welcome-message',
         aliases=['welcomemessage'],
-        description = '''
+        description = """
         Customise your Welcome Message ( Variables below allowed )
         ```bash\n
         $user : Name and tag of the User [ Sarthak_#0460 ]\n
@@ -51,13 +52,13 @@ class Welcomer(Cog):
         $joined-discord-timestamp : Timestamp Integer for Account Creation \n
         $joined-server-timestamp : Timestamp Integer for Server Join\n
         ```
-        '''
+        """
         
     )
     async def welcome_message(self , ctx : Context, *, message : str):
-        '''
+        """
         Welcome message for the Server
-        '''
+        """
         if not await GuildDataBase.get_guild_data(ctx.guild.id):
             return await ctx.reply(
                 embed = Embed(
@@ -82,16 +83,16 @@ class Welcomer(Cog):
         description = 'Setting up a welcome channel for the bot to send messages on new member joins\nThis can be set to None to avoid sending messages'
     )
     async def set_welcome_channel(self , ctx : Context , channel : Union[ TextChannel , str] ):
-        '''
+        """
         Setup Welcome Channel for the server
-        '''
+        """
         data = await GuildDataBase.get_guild_data(ctx.guild.id)
         if str(channel).lower() == 'none':
             if not await GuildDataBase.get_guild_data(ctx.guild.id):
                 await ctx.reply(
                     embed = Embed(
                         description=f'{self.bot.my_emojis["cross"]} The server has no welcome channel setup yet so you cannot set it to None',
-                        color = Color.red()
+                        color=await EmbedColor.color_for(ctx.guild) 
                     )
                 )
                 return
@@ -100,7 +101,7 @@ class Welcomer(Cog):
                 await ctx.reply(
                     embed = Embed(
                         description=f'{self.bot.my_emojis["tick"]} Welcome messages will no longer be sent',
-                        color = Color.green()
+                        color =  await EmbedColor.color_for(ctx.guild) 
                     )
                 )
                 return
@@ -108,7 +109,7 @@ class Welcomer(Cog):
             return await ctx.reply(
                 embed = Embed(
                     description=f'{self.bot.my_emojis["cross"]} The channel must be in the same server',
-                    color = Color.red()
+                    color = await EmbedColor.color_for(ctx.guild)
                 )
             )
         if data :
@@ -117,8 +118,8 @@ class Welcomer(Cog):
             await GuildDataBase.update_or_insert_guild_data(ctx.guild.id , channel.id , "$usermention , welcome to $server" , 'cyan' , 'embedmessage' )
         await ctx.reply(
             embed = Embed(
-                description= f'{ctx.bot.my_emojis["tick"]} changed welcome channel to {channel.mention}' ,
-                color = Color.green()
+                description= f'{ctx.bot.my_emojis["tick"]}  Set welcome channel to {channel.mention}' ,
+                color =await EmbedColor.color_for(ctx.guild) 
             )
         )
 
@@ -130,6 +131,7 @@ class Welcomer(Cog):
         data = await GuildDataBase.get_guild_data(member.guild.id)
         if not data : return
         message = data[2]
+        if data[1] == 'none' : return
         channel = self.bot.get_channel(int(data[1]))
         if not channel : return
         welcome_message =await self.process_message(message , member)
@@ -171,56 +173,58 @@ class Welcomer(Cog):
 
 class GuildDataBase:
     async def create_database():
-        async with connect('database/welcomes.db') as database:
+        async with connect('database/guild.db') as database:
             async with database.cursor() as cursor:
                 await cursor.execute(
-                    '''
+                    """
                     CREATE TABLE IF NOT EXISTS welcomer 
                     ( guild_id TEXT , channel_id TEXT , message TEXT , color TEXT , welcome_type TEXT)
-                    '''
+                    """
                 )
             await database.commit()
 
     async def get_guild_data(guild_id : str):
-        async with connect('database/welcomes.db') as database:
+        async with connect('database/guild.db') as database:
             async with database.cursor() as cursor:
                 data = await cursor.execute(
-                    '''
+                    """
                     SELECT * FROM welcomer 
                     WHERE guild_id = ?
-                    ''' ,
+                    """ ,
                     (str(guild_id) ,)
                 )
-                guild_data = data.fetchone()
+                guild_data = await data.fetchone()
+                if not guild_data : return 
                 return guild_data
     
     async def update_or_insert_guild_data(guild_id :str , channel_id :str, message : str  , color : str = 'blue' , type : str = 'embedmessage' ) -> None:
-        async with connect('database/welcomes.db') as database:
+        async with connect('database/guild.db') as database:
             async with database.cursor() as cursor:
                 data = await cursor.execute(
-                    '''
+                    """
                     SELECT * FROM welcomer 
                     WHERE guild_id = ?
-                    ''' ,
+                    """ ,
                     (str(guild_id), )
                 )
-                is_data = data.fetchone()
+                is_data = await data.fetchone()
                 if is_data:
                     await cursor.execute(
-                        '''
+                        """
                         UPDATE welcomer
                         SET channel_id = ? , message = ? , color = ? , welcome_type = ?
-                        ''' , 
-                        (str(channel_id), str(message) , str(color) , str(type) ,)
+                        where guild_id = ?
+                        """ , 
+                        (str(channel_id), str(message) , str(color) , str(type) , str(guild_id),)
                     )
                     await database.commit()
                 else:
                     await cursor.execute(
-                        '''
+                        """
                         INSERT INTO welcomer
                         ( guild_id , channel_id , message , color , welcome_type )
                         VALUES ( ? , ? , ? , ? , ?)
-                        ''' ,
+                        """ ,
                         (str(guild_id) , str(channel_id) , message , color , type , )
                     )   
                     await database.commit()
