@@ -4,7 +4,7 @@ from disnake import (
     Intents ,
     AllowedMentions
 )
-from aiosqlite3 import connect 
+from aiosqlite import connect 
 from os import getenv 
 from time import time
 
@@ -52,13 +52,19 @@ class Kakashi(Bot):
     
     async def on_ready(self):
         print(f'BOT IS READY\nNAME : {Kakashi.user}\nID : {Kakashi.user.id}')
-        async with connect('database/prefixes.db') as database:
+        async with connect('database/guild.db') as database:
             async with database.cursor() as cursor:
                 await cursor.execute(
-                    '''
+                    """
                     CREATE TABLE IF NOT EXISTS prefixes
                     ( guild_id TEXT , prefix TEXT)
-                    '''
+                    """
+                )
+                await cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS colors
+                    ( guild_id TEXT , color TEXT )
+                    """
                 )
                 await database.commit()
         await self.add_emojis()
@@ -70,16 +76,17 @@ class Kakashi(Bot):
         self , bot : Bot , message : Message
     ):
         if not message.guild : return '.'
-        async with connect('database/prefixes.db') as database:
+        async with connect('database/guild.db') as database:
             async with database.cursor() as cursor:
                 data = await cursor.execute(
-                    '''
+                    """
                     SELECT * FROM prefixes
                     WHERE guild_id = ?
-                    ''' ,
+                    """ ,
+                    
                     (str(message.guild.id),)
                 ) 
-                prefix = data.fetchone()
+                prefix = await data.fetchone()
                 if not prefix :
                     return when_mentioned_or('.')(bot , message)
                 return when_mentioned_or(prefix[1])(bot , message)
