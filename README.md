@@ -15,7 +15,7 @@ A Multipurpose Discord Bot written in [disnake](https://github.com/DisnakeDev/di
 
 🔲 : Ignore Channels
 
-🔲 : Color Customisation
+✅ : Color Customisation
 
 ## SUPPORT 
 
