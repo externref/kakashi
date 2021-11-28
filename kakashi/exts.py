@@ -16,6 +16,9 @@ colors = {
 
 class EmbedColor:
     async def color_for(guild):
+        """
+        Get color for a guild's embed
+        """
         color = await EmbedColor.get_embed_color(str(guild.id))
         return colors[color]
 
