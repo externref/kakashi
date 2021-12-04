@@ -16,7 +16,8 @@ colors = {
 
 class EmbedColor:
     async def color_for(guild):
-        color = await EmbedColor.get_embed_color(str(guild.id))
+        if not guild : color = await EmbedColor.get_embed_color(0)
+        else : color = await EmbedColor.get_embed_color(str(guild.id))
         return colors[color]
 
     async def get_embed_color(guild_id : str):
