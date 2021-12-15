@@ -1,13 +1,10 @@
-from typing import Optional, Union
-from disnake.app_commands import Option
-from disnake.enums import OptionType
 from . import (
     Cog ,
     Context ,
     Bot
 )
 from exts import EmbedColor
-from disnake.ext.commands import command , has_permissions , bot_has_permissions , slash_command
+from disnake.ext.commands import command , has_permissions , bot_has_permissions 
 from disnake import Member , Role , Embed , Color 
 
 class Utilities(Cog):
