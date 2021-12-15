@@ -7,7 +7,7 @@ from . import (
 )
 from exts import EmbedColor
 from time import monotonic , time
-from disnake.ext.commands import  command , bot_has_permissions , slash_command
+from disnake.ext.commands import  command , bot_has_permissions 
 from disnake import Color , Embed , ButtonStyle
 from disnake import ApplicationCommandInteraction as SlashContext
 from datetime import timedelta
@@ -80,39 +80,6 @@ Cached Users : {len(ctx.bot.users)}
             view.add_item(button)
         
         await ctx.reply(embed=embed , view=view)
-
-    @slash_command(
-        name='ping' ,
-        description='Bot\'s Latency'
-    )
-    async def send_ping(self , ctx  : SlashContext ):
-        """
-        The bot's websocket Latency,
-        """
-
-        e = monotonic()
-        await ctx.response.send_message(
-            ephemeral=True ,
-            embed = Embed(
-                title = f'{ctx.bot.my_emojis["wave2"]}\u200bPing !',
-                color = await EmbedColor.color_for(ctx.guild)
-            ).add_field(name='Bot Latency',value='```yaml\nCalc ms\n```').add_field(name='Script Latency',value='```yaml\nCalc ms\n```')
-        )
-        await ctx.edit_original_message(
-            embed = Embed(
-                title = f"{ctx.bot.my_emojis['wave2']}\u200b Pong !" ,
-                color = await EmbedColor.color_for(ctx.guild) 
-            ).add_field(name='Bot Latency',value=f'```yaml\n{round(ctx.bot.latency*1000)}ms\n```').add_field(name='Script Latency',value=f'```yaml\n{round((monotonic()-e)*1000)}ms\n```')
-        )
-
-    @Cog.listener('on_message')
-    async def add_command_count(self , message):
-        try:
-            if message.content.startswith((await self.bot.get_prefix(message))[2]):
-                if self.bot.get_command((message.content[1::].split())[0]):
-                    self.bot.ran_commands += 1
-        except:
-            return
-    
+   
 def setup(bot : Bot):
     bot.add_cog(General_CMDS(bot))

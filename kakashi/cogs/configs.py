@@ -1,6 +1,5 @@
 from disnake.ext.commands.core import has_permissions
 from disnake.interactions.application_command import ApplicationCommandInteraction
-from disnake.member import M
 from . import (
     Cog ,
     Button ,
@@ -118,35 +117,9 @@ class Configurations(Cog):
             )
         )
 
-    @slash_command(
-        name = 'prefix' ,
-        description='Change prefix for the server',
-        options = [
-            Option(name='newprefix' , description='The new prefix for the server',type=OptionType.string , required=True)
-        ]
-    )
-    async def change_prefix_slash(self , ctx : ApplicationCommandInteraction , newprefix : str):
-        """
-        Change Bot\'s prefix for a guild
-        """
-        if any([letter for letter in newprefix if letter in ['@' , '`' , '#']]):
-            return await ctx.response.send_message(
-                embed = Embed(
-                    description=f"{ctx.bot.my_emojis['cross']} Bot prefix Cannot contain \` , `@` or `#` characters due to discord markdown .",
-                    color = await EmbedColor.color_for(ctx.guild) 
-                )
-            )
-        await DataBaseHandler.insert_or_update_prefix(ctx , newprefix)
-        await ctx.response.send_message(
-            embed = Embed(
-                description=f"{ctx.bot.my_emojis['tick']} Prefix has been set to `{newprefix}` , You can always change the prefix with `prefix-set` command ",
-                color= Color.green()
-            )
-        )
-        
-        
-
-
+def setup(bot : Bot):
+    bot.add_cog(Configurations(bot))
+    
 class DataBaseHandler:
     async def add_color(ctx : Context , color):
         async with connect('database/guild.db') as database:
@@ -221,5 +194,3 @@ class DataBaseHandler:
                 await database.commit()
                 return
                 
-def setup(bot : Bot):
-    bot.add_cog(Configurations(bot))
