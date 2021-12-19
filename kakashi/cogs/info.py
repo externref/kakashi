@@ -10,9 +10,14 @@ from datetime import datetime
 from exts import EmbedColor
 
 class Info(Cog , name='info'):
+    """
+    Information Commands
+    """
     def __init__(self , bot: Bot):
         self.bot = bot
-        self.emoji = ""
+        self.help_desc="Various Information commands for you to keep a check on your server"
+        self.banner = "https://cdn.discordapp.com/emojis/920959295003185202.png"
+        self.emoji = "ℹ️"
     
     @command(
         name='avatar',
@@ -45,7 +50,7 @@ class Info(Cog , name='info'):
     @bot_has_permissions(send_messages=True , embed_links=True , read_message_history=True)
     async def get_information_about(self , ctx : Context , target : Union[Member , Role]):
         """
-        
+        Get info about mentioned object
         """
         if isinstance(target ,  Member) : embed = await EmbedMaker.for_member(ctx , target)
         elif isinstance(target , Role) : embed = await EmbedMaker.for_role(ctx , target)

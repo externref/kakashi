@@ -13,12 +13,15 @@ from aiosqlite import connect
 from disnake import Embed ,Color, Option,OptionType
 
 list_colors = ['red', 'blue', 'yellow', 'purple', 'darkblue', 'white', 'black', 'pink', 'cyan', 'skyblue', 'green']
-class Configurations(Cog):
+class Configurations(Cog , name='config'):
     """
     Bot Configurations for your server
     """
     def __init__(self , bot : Bot):
+        self.emoji = "⚙️"
         self.bot = bot
+        self.help_desc = "Commands that make the bot highly customisable for the server ;)\n"
+        self.banner = "https://cdn.discordapp.com/emojis/921039329416052777.png"
         self.colors = {
             'red' : Color.red(),
             'blue' : Color.blue(),
@@ -104,7 +107,7 @@ class Configurations(Cog):
         description='Change bot\'s prefix back to `.`'
     )
     @has_guild_permissions(manage_guild=True)
-    @bot_has_permissions(manage_guild=True)
+    @bot_has_permissions(embed_links = True , send_messages= True , read_message_history=True )
     async def remove_prefix_for_guild(self , ctx : Context):
         """
         Reset Server Prefix

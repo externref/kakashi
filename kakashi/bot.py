@@ -32,7 +32,7 @@ class Kakashi(Bot):
         self.server_invite = 'PgmzbNbf37'
         self.banner = 'https://i.imgur.com/kFiFzrC.jpg'
         self.load_extension('jishaku')
-        for file in ['utilities','info','configs','welcomer','general']:
+        for file in ['info','configs','welcomer','utilities','general','helpcmd']:
             try : 
                 self.load_extension('cogs.'+file)
                 print(file , 'loaded')

@@ -12,11 +12,14 @@ from disnake import Color , Embed , ButtonStyle
 from disnake import ApplicationCommandInteraction as SlashContext
 from datetime import timedelta
 
-class General_CMDS(Cog):
+class General_CMDS(Cog , name='general'):
     """
     Basic Bot Related Commands 
     """
     def __init__(self , bot : Bot):
+        self.emoji = "😄"
+        self.banner = "https://cdn.discordapp.com/emojis/898560210292068412.png"
+        self.help_desc = "Some general commands related to bot and its functionality"
         self.bot = bot
     
     @command(

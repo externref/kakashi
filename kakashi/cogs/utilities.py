@@ -7,9 +7,15 @@ from exts import EmbedColor
 from disnake.ext.commands import command , has_permissions , bot_has_permissions 
 from disnake import Member , Role , Embed , Color 
 
-class Utilities(Cog):
+class Utilities(Cog , name='utility'):
+    """
+    Utilities for your server
+    """
     def __init__(self , bot:Bot):
         self.bot = bot
+        self.emoji = "🛠️"
+        self.banner = "https://cdn.discordapp.com/emojis/920959102065188894.png"
+        self.help_desc = "Manage your server with these utility tools !"
         super().__init__()
 
     @command(
