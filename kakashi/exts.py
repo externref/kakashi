@@ -31,6 +31,5 @@ class EmbedColor:
                     (str(guild_id) ,)
                 )
                 guild_data = await data.fetchone()
-                print(guild_data)
                 if guild_data : return guild_data[1]
                 else : return 'blue'
