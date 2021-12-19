@@ -1,3 +1,4 @@
+from disnake.ext.commands.core import guild_only
 from disnake.ui.view import View
 from . import (
     Cog ,
@@ -9,12 +10,19 @@ from . import (
 from exts import EmbedColor
 from aiosqlite import connect
 from disnake import Color , Member , Embed , TextChannel 
-from disnake.ext.commands import command
+from disnake.ext.commands import command , has_permissions ,bot_has_permissions
 from typing import Union
 
-class Welcomer(Cog):
+class Welcomer(Cog , name='welcome'):
+    """
+    An awesome welcomer module
+    """
+
     def __init__(self  , bot : Bot):
         self.bot : Bot = bot
+        self.emoji = "👋"
+        self.banner= "https://cdn.discordapp.com/emojis/840977619427262524.png"
+        self.help_desc = "Greeting to the new users who joins your server"
         self.allowed_colors = {
             'red' : Color.red(),
             'blue' : Color.blue(),
@@ -33,6 +41,18 @@ class Welcomer(Cog):
     @Cog.listener()
     async def on_ready(self):
         await GuildDataBase.create_database()
+    
+    @command(
+        name = 'welcome',
+        hidden=True,
+        description="Shows help for welcomer module"
+    )
+    @bot_has_permissions(embed_links = True , send_messages= True , read_message_history=True )
+    async def send_help_for_welcome(self , ctx : Context):
+        """
+        Shows this message
+        """
+        await ctx.send_help(self.bot.get_cog('welcome'))
 
     @command(
         name= 'welcome-message',
@@ -40,21 +60,23 @@ class Welcomer(Cog):
         description = """
         Customise your Welcome Message ( Variables below allowed )
         ```bash\n
-        $user : Name and tag of the User [ Sarthak_#0460 ]\n
-        $usermention : Mention of the new Member [ <@!580034015759826944> ]\n
-        $userid : Id of the Member [ 580034015759826944 ]\n
-        $username : Username of the Member [ Sarthak_ ]\n
-        $userdiscrim / $userdiscriminator : Discriminator of the User [ 0460 ]\n
-        $server / $servername : Name of the Server [ VELOC1TY ]\n
-        $membercount : Membercount of the Server [ 69 ] \n
-        $joined-discord : DD-MM-YYYY of account creatation [ 12 May 2019 ]\n
-        $joined-server : DD-MM-YYYY of Server Join [ 23 Aug 2021 ]\n
-        $joined-discord-timestamp : Timestamp Integer for Account Creation \n
+        $user : Name and tag of the User [ Sarthak_#0460 ]
+        $usermention : Mention of the new Member [ <@!580034015759826944> ]
+        $userid : Id of the Member [ 580034015759826944 ]
+        $username : Username of the Member [ Sarthak_ ]
+        $userdiscrim / $userdiscriminator : Discriminator of the User [ 0460 ]
+        $server / $servername : Name of the Server [ VELOC1TY ]
+        $membercount : Membercount of the Server [ 69 ] 
+        $joined-discord : DD-MM-YYYY of account creatation [ 12 May 2019 ]
+        $joined-server : DD-MM-YYYY of Server Join [ 23 Aug 2021 ]
+        $joined-discord-timestamp : Timestamp Integer for Account Creation 
         $joined-server-timestamp : Timestamp Integer for Server Join\n
         ```
         """
         
     )
+    @has_permissions(manage_guild=True)
+    @bot_has_permissions(embed_links = True , send_messages= True , read_message_history=True )
     async def welcome_message(self , ctx : Context, *, message : str):
         """
         Welcome message for the Server
@@ -80,8 +102,10 @@ class Welcomer(Cog):
     @command(
         name = 'welcome-channel',
         aliases=['welcomechannel','set-welcome-channel','setwelcomechannel'],
-        description = 'Setting up a welcome channel for the bot to send messages on new member joins\nThis can be set to None to avoid sending messages'
+        description = 'Setting up a welcome channel for the bot to send messages on new member joins\nThis can be set to `None` to avoid sending messages'
     )
+    @has_permissions(manage_guild=True)
+    @bot_has_permissions(embed_links = True , send_messages= True , read_message_history=True )
     async def set_welcome_channel(self , ctx : Context , channel : Union[ TextChannel , str] ):
         """
         Setup Welcome Channel for the server
@@ -123,7 +147,47 @@ class Welcomer(Cog):
             )
         )
 
-    
+    @command(
+        name='welcome-color',
+        aliases=['welcomecolor'],
+        description='Set the color which appears in the welcoming embed for your server'
+    )
+    @has_permissions(manage_guild=True)
+    @bot_has_permissions(embed_links = True , send_messages= True , read_message_history=True )
+    async def welcome_color(self , ctx : Context , color : str):
+        """
+        Custom Color for welcome messages
+        """
+        if not color in self.allowed_colors.keys():return await ctx.reply(embed=Embed(title='INVALID COLOR' , color = Color.red(),description=f'Available Colors : ```\n{",".join(c for c in self.allowed_colors.keys())}\n```'))
+
+    @command(
+        name = 'welcome-type',
+        aliases= ['welcometype'],
+        description = "Choose between embed messages and normal text messages ! `embed` and `text` are the available welcome types"
+    )
+    @has_permissions(manage_guild=True)
+    @bot_has_permissions(embed_links = True , send_messages= True , read_message_history=True )
+    async def change_welcome_type(self , ctx : Context , welcome_type : str):
+        """
+        Choose the welcome type for server
+        """
+        if not welcome_type in ['text','message'] : return await ctx.reply(embed=Embed(description=f"{self.bot.my_emojis['cross']} Type must be either `text` or `embed`",color= await EmbedColor.color_for(ctx.guild)))
+        data = await GuildDataBase.get_guild_data(ctx.guild.id)
+        if not data:
+            return await ctx.reply(
+                embed = Embed(
+                    description=f'{self.bot.my_emojis["cross"]} The server has no welcome channel setup yet .',
+                    color=await EmbedColor.color_for(ctx.guild) 
+                )
+            )
+        await GuildDataBase.update_or_insert_guild_data(data[0],data[1],data[2],data[3],f"{welcome_type}message")
+        await ctx.reply(
+            embed = Embed(
+                description=f"{self.bot.my_emojis['tick']} Changed welcome type to `{welcome_type}`",
+                color = await EmbedColor.color_for(ctx.guild)
+            )
+        )
+            
         
 
     @Cog.listener()
@@ -137,9 +201,8 @@ class Welcomer(Cog):
         welcome_message =await self.process_message(message , member)
         if data[4] == 'textmessage':
             content =  welcome_message 
-            await channel.send(
-                content = content
-                )
+            try : await channel.send(content = content)
+            except : pass
         elif data[4] == 'embedmessage':
             embed = Embed(
             description= welcome_message , 
@@ -147,9 +210,8 @@ class Welcomer(Cog):
             ).set_author(name = str(member), icon_url=(member.avatar or member.default_avatar).url)
             embed.set_thumbnail(url=(member.avatar or member.default_avatar).url)
             embed.set_footer()
-            await channel.send(
-                embed = embed
-                )
+            try : await channel.send(embed = embed)
+            except : pass
 
     async def process_message(self , message , member):
         message_to_return=  (message
