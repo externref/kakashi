@@ -159,6 +159,21 @@ class Welcomer(Cog , name='welcome'):
         Custom Color for welcome messages
         """
         if not color in self.allowed_colors.keys():return await ctx.reply(embed=Embed(title='INVALID COLOR' , color = Color.red(),description=f'Available Colors : ```\n{",".join(c for c in self.allowed_colors.keys())}\n```'))
+        data = await GuildDataBase.get_guild_data(ctx.guild.id)
+        if not data:
+            return await ctx.reply(
+                embed = Embed(
+                    description=f'{self.bot.my_emojis["cross"]} The server has no welcome channel setup yet .',
+                    color=await EmbedColor.color_for(ctx.guild) 
+                )
+            )
+        await GuildDataBase.update_or_insert_guild_data(data[0],data[1],data[2],color,data[4])
+        await ctx.reply(
+            embed = Embed(
+                color = await EmbedColor.color_for(ctx.guild),
+                description=f"{self.bot.my_emojis['tick']} Changed color to `{color}`"
+            )
+        )
 
     @command(
         name = 'welcome-type',
