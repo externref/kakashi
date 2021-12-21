@@ -1,4 +1,4 @@
-from disnake.ext.commands import HelpCommand ,  Context , Cog , Bot , Command
+from disnake.ext.commands import HelpCommand ,  Context , Cog , Bot , Command , bot_has_permissions
 from disnake import Embed , SelectOption , MessageInteraction , Message
 from exts import EmbedColor
 from asyncio import sleep
@@ -8,7 +8,7 @@ from disnake.ui import View , Select , Button
 
 
 class MyHelp(HelpCommand):
-
+    
     async def send_bot_help(self, mapping):
         categories = self.context.bot.cogs
         embed = Embed(
@@ -17,17 +17,17 @@ class MyHelp(HelpCommand):
         )
         for cog in categories:
             cog : Cog = self.context.bot.get_cog(cog)
-            if cog.qualified_name in ['HelpCog','Jishaku']: continue
+            if cog.qualified_name in ['HelpCog','Jishaku' , 'botbase']: continue
             embed.add_field(
                 name = f"{cog.emoji} {cog.qualified_name.upper()} COMMANDS",
-                value = f"`{(await self.context.bot.get_prefix(self.context.message))[2]}help {cog.qualified_name}` ; [{len(cog.get_commands())} commands] {cog.__doc__}",
+                value = f"`{(await self.context.bot.get_prefix(self.context.message))[2]}help {cog.qualified_name}` ; [{len(cog.get_commands())} commands] {cog.__doc__.replace('    ','')}",
                 inline=False
             )
         embed.set_author(name=f'{self.context.bot.user.name.upper()} HELP',icon_url=self.context.bot.user.display_avatar)
         embed.set_thumbnail(url=self.context.bot.user.display_avatar)
         embed.set_footer(text=f'Requested by {self.context.author}',icon_url=self.context.author.display_avatar)
         view = HelpView()
-        view.add_item(HelpDropMenu(self.context.bot))
+        view.add_item(HelpDropMenu(self.context))
         view.message = await self.context.reply(
             embed=embed,
             view = view
@@ -35,14 +35,14 @@ class MyHelp(HelpCommand):
     
     async def send_cog_help(self , cog : Cog):
         await self.context.reply(
-            embed = await embed_for_cog( cog , self.context)
+            embed = await embed_for_cog( self ,cog , self.context)
         )
     
     async def send_command_help(self, command : Command):
         
         help_dict={
             'Name' : command.name ,
-            'Aliases' : " , ".join(command.aliases),
+            'Aliases' : " , ".join(command.aliases) or "No aliases",
             'Description' : command.description ,
             'Usage' : "```\n"+(await self.context.bot.get_prefix(self.context.message))[2]+command.name +" "+ command.signature+"```"
         }
@@ -74,12 +74,14 @@ class HelpView(View):
         
         
 class HelpDropMenu(Select):
-    def __init__(self , bot : Bot):
-        self.bot = bot
+    def __init__(self , ctx : Context):
+        self.context = None
+        self.bot = ctx.bot
+        self.context = ctx
         opts = []
-        for cog in bot.cogs:
-            cog = bot.get_cog(cog)
-            if cog.qualified_name in ['HelpCog','Jishaku']: continue
+        for cog in ctx.bot.cogs:
+            cog = ctx.bot.get_cog(cog)
+            if cog.qualified_name in ['HelpCog','Jishaku' , 'botbase']: continue
             opts.append(
                 SelectOption(label=f"{cog.qualified_name.upper()} COMMANDS",emoji=cog.emoji,description=cog.__doc__,value=cog.qualified_name )
             )
@@ -90,7 +92,7 @@ class HelpDropMenu(Select):
     async def callback(self, interaction: MessageInteraction):
         cog = [self.bot.get_cog(cog) for cog in self.bot.cogs if interaction.values[0]==self.bot.get_cog(cog).qualified_name]
         await interaction.message.edit(
-            embed = await embed_for_cog(cog[0] , interaction)
+            embed = await embed_for_cog(self , cog[0] , interaction)
         )
         await interaction.response.send_message(f'Showing help for {cog[0].qualified_name.upper()} COMMANDS',ephemeral=True)
         
@@ -104,11 +106,11 @@ class HelpCog(Cog):
 def setup(bot : Bot):
     bot.add_cog(HelpCog(bot))
 
-async def embed_for_cog(cog : Cog , inter : Union[Context , MessageInteraction]):
+async def embed_for_cog(self , cog : Cog , inter : Union[Context , MessageInteraction]):
     commands = cog.get_commands()
     desc : str = cog.help_desc + "\nUse `help <command-name>` for more info\n\n"
     for command in commands:
-        desc=desc +"`" + command.name + "` : "+ command.short_doc+"\n"
+        desc=desc +"`" +(await self.context.bot.get_prefix(self.context.message))[2]+ command.name + "` : "+ command.short_doc+"\n"
     embed = Embed(
         color = await EmbedColor.color_for(inter.guild),
         description=desc
