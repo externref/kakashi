@@ -12,7 +12,8 @@ from disnake.ext.commands import (
     NotOwner ,
     CommandOnCooldown,
     CommandError,
-    BadUnionArgument
+    BadUnionArgument,
+    MissingRequiredArgument
 )
 from disnake import Embed
 from exts import EmbedColor
@@ -53,6 +54,8 @@ class Developer(Cog , name='botbase'):
             description , emoji = f"Invalid {error.param.name} supplied"  , self.bot.my_emojis['cross']
         elif isinstance( error , CommandOnCooldown ):
             description , emoji = f"You need to wait for {int(error.retry_after)} seconds before trying again" , self.bot.get_emoji(841711427052240927)
+        elif isinstance( error , MissingRequiredArgument):
+            description , emoji = f"`{error.param.name}` is a required argument" ,  "❗"
         else :  raise error
         embed = Embed(
             description= str(emoji)+ " " + description ,
