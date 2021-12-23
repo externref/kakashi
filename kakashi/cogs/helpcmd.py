@@ -1,5 +1,5 @@
 from disnake.ext.commands import HelpCommand ,  Context , Cog , Bot , Command , bot_has_permissions
-from disnake import Embed , SelectOption , MessageInteraction , Message
+from disnake import Embed , SelectOption , MessageInteraction , Message ,ButtonStyle
 from exts import EmbedColor
 from asyncio import sleep
 from datetime import datetime
@@ -28,6 +28,8 @@ class MyHelp(HelpCommand):
         embed.set_footer(text=f'Requested by {self.context.author}',icon_url=self.context.author.display_avatar)
         view = HelpView()
         view.add_item(HelpDropMenu(self.context))
+        view.add_item(InviteButton(self.context))
+        #view.add_item(VoteButton(self.context))
         view.message = await self.context.reply(
             embed=embed,
             view = view
@@ -66,12 +68,40 @@ class HelpView(View):
             timeout=60
         )
     async def on_timeout(self):
-        self.children[0].disabled = True 
+        self.children[0].disabled = True
+        self.remove_item(self.children[1])
         await self.message.edit(
             content= '`Menu Options` is no longer active',
             view=self
         )
-        
+
+class InviteButton(Button):
+    def __init__(self , ctx : Context):
+        super().__init__(
+            emoji= "🔗",
+            label = 'Invite',
+            url = ctx.bot.invite_url,
+            style = ButtonStyle.url
+        )
+
+class VoteButton(Button):
+    def __init__(self , ctx : Context):
+        super().__init__(
+            emoji= ctx.bot.get_emoji(841178289171333120),
+            label = 'Vote',
+            disabled=True,
+            url = f"https://top.gg/bot"+str(ctx.bot.user.id),
+            style = ButtonStyle.url
+        )
+
+class ServerButton(Button):
+    def __init__(self , ctx : Context):
+        super().__init__(
+            emoji= ctx.bot.get_emoji(840977048734269451),
+            label = 'Invite',
+            url = ctx.bot.invite_url,
+            style = ButtonStyle.url
+        )
         
 class HelpDropMenu(Select):
     def __init__(self , ctx : Context):
