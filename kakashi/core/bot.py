@@ -1,4 +1,4 @@
-from disnake.ext.commands import Bot  , when_mentioned_or 
+from disnake.ext.commands import Bot , when_mentioned_or  
 from disnake import (
     Message , 
     Intents ,
@@ -9,11 +9,7 @@ from os import getenv
 from time import time
 
 class Kakashi(Bot):
-    async def get_prefix_for_guild(
-        self ,bot : Bot ,  message : Message
-    ):
-        return await self.get_prefix_from_database(bot , message) 
-
+    
     def __init__(self):
         super().__init__(
             command_prefix=self.get_prefix_for_guild ,
@@ -25,7 +21,8 @@ class Kakashi(Bot):
                 everyone=False ,
                 replied_user=False ,
                 roles=False
-            )
+            ),
+            description = "A multipurpose customizable bot with server management , utility and fun commands"
         )
         self.boot_time = time()
         self.ran_commands = 0
@@ -40,6 +37,12 @@ class Kakashi(Bot):
             except Exception as e:
                 raise e
     
+    async def get_prefix_for_guild(
+        self ,bot : Bot ,  message : Message
+    ):
+        return await self.get_prefix_from_database(bot , message) 
+
+    
     async def add_emojis(self):
         self.my_emojis = {
             'wave' : self.get_emoji(898560210292068412) ,
@@ -52,7 +55,7 @@ class Kakashi(Bot):
 
     
     async def on_ready(self):
-        print(f'BOT IS READY\nNAME : {Kakashi.user}\nID : {Kakashi.user.id}')
+        print(f'BOT IS READY\nNAME : {self.user}\nID : {self.user.id}')
         async with connect('database/guild.db') as database:
             async with database.cursor() as cursor:
                 await cursor.execute(
@@ -91,6 +94,7 @@ class Kakashi(Bot):
                 if not prefix :
                     return when_mentioned_or('.')(bot , message)
                 return when_mentioned_or(prefix[1])(bot , message)
-            
-Kakashi = Kakashi()
-Kakashi.run(getenv('TOKEN'))
+
+if __name__ == '__main__':            
+    Kakashi = Kakashi()
+
