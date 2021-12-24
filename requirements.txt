@@ -1,3 +1,4 @@
-disnake~=2.2.1
-disnake-jishaku~=2.6.5
-aiosqlite~=0.17.0
+disnake
+disnake-jishaku
+aiosqlite
+pillow 
