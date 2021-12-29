@@ -2,7 +2,7 @@ from exts import EmbedColor
 from time import monotonic, time
 from disnake.ext.commands import Cog, Bot, Context, command, bot_has_permissions
 from disnake import Embed, ButtonStyle
-from discord.ui import View, Button
+from disnake.ui import View, Button
 from datetime import timedelta
 
 
