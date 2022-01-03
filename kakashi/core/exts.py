@@ -1,5 +1,5 @@
 from aiosqlite import connect
-from disnake import Color
+from disnake.colour import Color
 
 colors = {
     "red": Color.red(),

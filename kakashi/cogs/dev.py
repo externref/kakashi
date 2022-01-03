@@ -1,12 +1,13 @@
-from os import getenv
-from disnake import Embed, Activity, ActivityType, Status, Guild, Color
-from asyncio import sleep, create_task
-from exts import EmbedColor
-from os import environ
-from disnake.ext.commands import (
-    Context,
-    Cog,
-    Bot,
+from disnake.embeds import Embed
+from disnake.activity import Activity, ActivityType
+from disnake.enums import Status
+from disnake.guild import Guild
+from disnake.colour import Color
+from disnake.ext.tasks import loop
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import (
     command,
     is_owner,
     MemberNotFound,
@@ -20,7 +21,11 @@ from disnake.ext.commands import (
     BadUnionArgument,
     MissingRequiredArgument,
     CommandNotFound,
+    PrivateMessageOnly,
+    NoPrivateMessage,
 )
+from kakashi.core.exts import EmbedColor
+from os import getenv, environ
 
 
 class Developer(Cog, name="botbase"):
@@ -32,6 +37,7 @@ class Developer(Cog, name="botbase"):
     async def when_bot_ready(self):
         await self.start_status_task()
 
+    @loop(seconds=30)
     async def status_task(self):
         mc = 0
         mc_list = [guild.member_count for guild in self.bot.guilds]
@@ -44,18 +50,17 @@ class Developer(Cog, name="botbase"):
             ),
             status=Status.idle,
         )
-        await sleep(30)
 
     async def start_status_task(self):
         await self.bot.wait_until_ready()
-        create_task(self.status_task())
+        self.status_task.start()
 
     @command(name="refresh", aliases=["reboot"])
     @is_owner()
     async def owner_reload_cogs(self, ctx: Context):
         for cog in self.bot.cog_list[1:]:
             try:
-                self.bot.reload_extension("cogs." + cog)
+                self.bot.reload_extension("kakashi.cogs." + cog)
                 print(cog, "loaded")
             except Exception as e:
                 raise e
@@ -82,7 +87,7 @@ class Developer(Cog, name="botbase"):
         )
         if guild.icon:
             embed.set_thumbnail(url=guild.icon.url)
-        await self.bot.get_channel(int(getenv('LOG_CHANNEL'))).send(embed=embed)
+        await self.bot.get_channel(int(getenv("LOG_CHANNEL"))).send(embed=embed)
 
     @Cog.listener("on_guild_remove")
     async def removed_from_server(self, guild: Guild):
@@ -99,7 +104,7 @@ class Developer(Cog, name="botbase"):
         embed.add_field(
             name="Current Server Count", value=len(self.bot.guilds), inline=False
         )
-        await self.bot.get_channel(int(getenv('LOG_CHANNEL'))).send(embed=embed)
+        await self.bot.get_channel(int(getenv("LOG_CHANNEL"))).send(embed=embed)
 
     @Cog.listener("on_command_error")
     async def error_handler(self, ctx: Context, error: CommandError):
@@ -152,6 +157,16 @@ class Developer(Cog, name="botbase"):
             )
         elif isinstance(error, MissingRequiredArgument):
             description, emoji = f"`{error.param.name}` is a required argument", "❗"
+        elif isinstance(error, NoPrivateMessage):
+            description, emoji = (
+                f"`{ctx.command.name}` works only in servers",
+                self.bot.my_emojis["cross"],
+            )
+        elif isinstance(error, PrivateMessageOnly):
+            description, emoji = (
+                f"`{ctx.command.name}` works in dms only",
+                self.bot.my_emojis["cross"],
+            )
         else:
             raise error
         embed = Embed(

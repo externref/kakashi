@@ -1,16 +1,16 @@
-from disnake.ext.commands.core import has_permissions
-from exts import EmbedColor
-from disnake.ext.commands import (
-    Cog,
-    Bot,
-    Context,
-    command,
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.core import command
+from disnake.ext.commands.core import (
+    has_permissions,
     has_guild_permissions,
     bot_has_permissions,
-    has_permissions,
 )
+from disnake.ext.commands import Context
+from disnake.embeds import Embed
+from disnake.colour import Color
+from kakashi.core.exts import EmbedColor
 from aiosqlite import connect
-from disnake import Embed, Color
 
 list_colors = [
     "red",

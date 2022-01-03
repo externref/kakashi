@@ -1,4 +1,4 @@
-from core import bot
+from kakashi.core import bot
 from os import getenv
 
 if __name__ == "__main__":

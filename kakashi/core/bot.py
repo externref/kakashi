@@ -1,5 +1,7 @@
-from disnake.ext.commands import Bot, when_mentioned_or
-from disnake import Message, Intents, AllowedMentions
+from disnake.ext.commands.bot import Bot, when_mentioned_or
+from disnake.message import Message
+from disnake.flags import Intents
+from disnake.mentions import AllowedMentions
 from aiosqlite import connect
 from os import getenv
 from time import time
@@ -26,16 +28,16 @@ class Kakashi(Bot):
         self.cog_list = [
             "dev",
             "info",
+            "helpcmd",
             "fun",
             "configs",
             "welcomer",
             "utilities",
             "general",
-            "helpcmd",
         ]
         for file in self.cog_list:
             try:
-                self.load_extension("cogs." + file)
+                self.load_extension("kakashi.cogs." + file)
                 print(file, "loaded")
             except Exception as e:
                 raise e

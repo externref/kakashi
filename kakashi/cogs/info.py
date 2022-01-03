@@ -1,16 +1,15 @@
-from disnake.ext.commands import (
-    Bot,
-    Cog,
-    Context,
-    command,
-    has_permissions,
-    bot_has_permissions,
-    guild_only,
-)
-from disnake import User, Embed, Member, Role, ApplicationCommandInteraction
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import command, bot_has_permissions, guild_only
+from disnake.user import User
+from disnake.member import Member
+from disnake.role import Role
+from disnake.interactions.application_command import ApplicationCommandInteraction
+from disnake.embeds import Embed
 from typing import Union
 from datetime import datetime
-from exts import EmbedColor
+from kakashi.core.exts import EmbedColor
 
 
 class Info(Cog, name="info"):

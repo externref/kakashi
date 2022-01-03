@@ -1,14 +1,13 @@
-from exts import EmbedColor
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import command, bot_has_permissions, has_permissions
+from disnake.member import Member
+from disnake.channel import TextChannel
+from disnake.colour import Color
+from disnake.embeds import Embed
+from kakashi.core.exts import EmbedColor
 from aiosqlite import connect
-from disnake import Color, Member, Embed, TextChannel
-from disnake.ext.commands import (
-    Bot,
-    Cog,
-    Context,
-    command,
-    has_permissions,
-    bot_has_permissions,
-)
 from typing import Union
 
 

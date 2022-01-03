@@ -1,23 +1,28 @@
-from disnake.ext.commands import (
-    HelpCommand,
-    Context,
-    Cog,
-    Bot,
-    Command,
-    bot_has_permissions,
-)
-from disnake import Embed, SelectOption, MessageInteraction, Message, ButtonStyle
-from exts import EmbedColor
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.help import HelpCommand
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import Command
+from disnake.ui.button import Button
+from disnake.enums import ButtonStyle
+from disnake.ui.select import Select
+from disnake.ui.view import View
+from disnake.embeds import Embed
+from disnake.message import Message
+from disnake.components import SelectOption
+from disnake.interactions.message import MessageInteraction
+from kakashi.core.exts import EmbedColor
 from datetime import datetime
 from typing import Union
-from disnake.ui import View, Select, Button
 
 
 class MyHelp(HelpCommand):
     async def send_bot_help(self, mapping):
         categories = self.context.bot.cogs
+        desc = f"```asciidoc\nPrefix :: {(await self.context.bot.get_prefix(self.context.message))[2]}\n```"
         embed = Embed(
             color=await EmbedColor.color_for(self.context.guild),
+            description=desc,
             timestamp=datetime.now(),
         )
         for cog in categories:

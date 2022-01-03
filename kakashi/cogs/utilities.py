@@ -1,13 +1,11 @@
-from exts import EmbedColor
-from disnake.ext.commands import (
-    Cog,
-    Context,
-    Bot,
-    command,
-    has_permissions,
-    bot_has_permissions,
-)
-from disnake import Member, Role, Embed
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import command, bot_has_permissions, has_permissions
+from disnake.member import Member
+from disnake.role import Role
+from disnake.embeds import Embed
+from kakashi.core.exts import EmbedColor
 
 
 class Utilities(Cog, name="utility"):

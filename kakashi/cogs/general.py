@@ -1,8 +1,13 @@
-from exts import EmbedColor
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import command, bot_has_permissions
+from disnake.ui.button import Button
+from disnake.enums import ButtonStyle
+from disnake.ui.view import View
+from disnake.embeds import Embed
+from kakashi.core.exts import EmbedColor
 from time import monotonic, time
-from disnake.ext.commands import Cog, Bot, Context, command, bot_has_permissions
-from disnake import Embed, ButtonStyle
-from disnake.ui import View, Button
 from datetime import timedelta
 
 

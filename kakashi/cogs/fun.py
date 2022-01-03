@@ -1,16 +1,14 @@
-from disnake.ext.commands import (
-    Cog,
-    Bot,
-    command,
-    bot_has_permissions,
-    cooldown,
-    BucketType,
-)
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.bot import Bot
+from disnake.ext.commands.core import bot_has_permissions, cooldown
+from disnake.ext.commands.core import command
+from disnake.ext.commands.cooldowns import BucketType
 from disnake.ext.commands.context import Context
+from disnake.file import File
+from disnake.embeds import Embed
+from disnake.user import User
 from aiohttp import ClientSession
-from disnake import Embed, User, File
-from exts import EmbedColor
-from asyncio import get_running_loop
+from kakashi.core.exts import EmbedColor
 from random import randint
 from io import BytesIO
 from PIL import Image
