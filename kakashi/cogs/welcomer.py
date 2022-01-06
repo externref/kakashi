@@ -213,7 +213,7 @@ class Welcomer(Cog, name="welcome"):
         """
         Choose the welcome type for server
         """
-        if not welcome_type in ["text", "message"]:
+        if not welcome_type in ["text", "embed"]:
             return await ctx.reply(
                 embed=Embed(
                     description=f"{self.bot.my_emojis['cross']} Type must be either `text` or `embed`",
