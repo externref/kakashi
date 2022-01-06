@@ -19,7 +19,7 @@ from typing import Union
 class MyHelp(HelpCommand):
     async def send_bot_help(self, mapping):
         categories = self.context.bot.cogs
-        desc = f"```asciidoc\nPrefix :: {(await self.context.bot.get_prefix(self.context.message))[2]}\n```"
+        desc = f"```asciidoc\nPrefix :: {(await self.context.bot.get_prefix(self.context.message))[2]}\n```\n[{self.context.bot.get_emoji(840977048734269451)} Invite]({self.context.bot.invite_url}) | [Vote on Top.gg]({'https://top.gg/bot' + str(self.context.bot.user.id)}) | [Support](https://discord.gg/{self.context.bot.server_invite})\n"
         embed = Embed(
             color=await EmbedColor.color_for(self.context.guild),
             description=desc,
@@ -46,7 +46,7 @@ class MyHelp(HelpCommand):
         view = HelpView()
         view.add_item(HelpDropMenu(self.context))
         view.add_item(InviteButton(self.context))
-        # view.add_item(VoteButton(self.context))
+        view.add_item(VoteButton(self.context))
         view.message = await self.context.reply(embed=embed, view=view)
 
     async def send_cog_help(self, cog: Cog):
@@ -88,15 +88,7 @@ class HelpView(View):
 
     async def on_timeout(self):
         self.children[0].disabled = True
-        self.remove_item(self.children[1])
         await self.message.edit(content="`Menu Options` is no longer active", view=self)
-
-
-class InviteButton(Button):
-    def __init__(self, ctx: Context):
-        super().__init__(
-            emoji="🔗", label="Invite", url=ctx.bot.invite_url, style=ButtonStyle.url
-        )
 
 
 class VoteButton(Button):
@@ -104,19 +96,20 @@ class VoteButton(Button):
         super().__init__(
             emoji=ctx.bot.get_emoji(841178289171333120),
             label="Vote",
-            disabled=True,
             url=f"https://top.gg/bot" + str(ctx.bot.user.id),
             style=ButtonStyle.url,
+            row = 1
         )
 
 
-class ServerButton(Button):
+class InviteButton(Button):
     def __init__(self, ctx: Context):
         super().__init__(
             emoji=ctx.bot.get_emoji(840977048734269451),
             label="Invite",
             url=ctx.bot.invite_url,
             style=ButtonStyle.url,
+            row=1
         )
 
 
