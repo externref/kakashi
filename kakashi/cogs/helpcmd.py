@@ -11,7 +11,7 @@ from disnake.embeds import Embed
 from disnake.message import Message
 from disnake.components import SelectOption
 from disnake.interactions.message import MessageInteraction
-from kakashi.core.exts import EmbedColor
+from kakashi.core.exts import EmbedColor, Parser
 from datetime import datetime
 from typing import Union
 
@@ -58,11 +58,11 @@ class MyHelp(HelpCommand):
             "Name": command.name,
             "Aliases": " , ".join(command.aliases) or "No aliases",
             "Description": command.description.replace("        ", ""),
-            "Usage": "```\n"
+            "Usage": "```ini\n"
             + (await self.context.bot.get_prefix(self.context.message))[2]
             + command.name
             + " "
-            + command.signature
+            + await Parser.command_signature(command)
             + "```",
         }
         desc = "\n".join("**" + key + " :** " + help_dict[key] for key in help_dict)

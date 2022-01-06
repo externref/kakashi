@@ -1,5 +1,6 @@
 from aiosqlite import connect
 from disnake.colour import Color
+from disnake.ext.commands.core import command
 
 colors = {
     "red": Color.red(),
@@ -14,6 +15,21 @@ colors = {
     "skyblue": 0x87CEEB,
     "green": Color.green(),
 }
+
+
+class Parser:
+    async def command_signature(command):
+        command_signature = ""
+        for arg in command.signature.split("] ["):
+            if "=" in arg:
+                parsed_arg = "{" + arg.split("=")[0].strip("[]<>]") + "}"
+            else:
+                parsed_arg = "[" + arg.strip("[]<>") + "]"
+                if parsed_arg == "[]":
+                    parsed_arg = ""
+            command_signature += parsed_arg + " "
+
+        return command_signature
 
 
 class EmbedColor:
