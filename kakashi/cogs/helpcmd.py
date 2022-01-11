@@ -19,7 +19,7 @@ from typing import Union
 class MyHelp(HelpCommand):
     async def send_bot_help(self, mapping):
         categories = self.context.bot.cogs
-        desc = f"```asciidoc\nPrefix :: {(await self.context.bot.get_prefix(self.context.message))[2]}\n```\n[{self.context.bot.get_emoji(840977048734269451)} Invite]({self.context.bot.invite_url}) | [Vote on Top.gg]({'https://top.gg/bot' + str(self.context.bot.user.id)}) | [Support](https://discord.gg/{self.context.bot.server_invite})\n"
+        desc = f"```asciidoc\nPrefix :: {(await self.context.bot.get_prefix(self.context.message))[2]}\n```\n[{self.context.bot.get_emoji(840977048734269451)} Invite]({self.context.bot.invite_url}) | [Vote on Top.gg]({'https://top.gg/bot/' + str(self.context.bot.user.id)}) | [Support](https://discord.gg/{self.context.bot.server_invite})\n"
         embed = Embed(
             color=await EmbedColor.color_for(self.context.guild),
             description=desc,
@@ -96,7 +96,7 @@ class VoteButton(Button):
         super().__init__(
             emoji=ctx.bot.get_emoji(841178289171333120),
             label="Vote",
-            url=f"https://top.gg/bot" + str(ctx.bot.user.id),
+            url=f"https://top.gg/bot/" + str(ctx.bot.user.id),
             style=ButtonStyle.url,
             row = 1
         )
