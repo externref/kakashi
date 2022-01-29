@@ -56,6 +56,7 @@ async def meme_cmd(ctx: Context):
 @command(name="neko", description="A neko picture")
 @implements(SlashCommand, PrefixCommand)
 async def neko_cmd(ctx: Context):
+    """Neko picture"""
     async with ClientSession() as session:
         res = await session.get("https://neko-love.xyz/api/v1/neko")
         data = await res.json()

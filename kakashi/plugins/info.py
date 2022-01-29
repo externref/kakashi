@@ -98,6 +98,7 @@ async def roleinfo_cmd(ctx: Context):
 @command(name="emoji", description="Infor about an Custom Emoji", aliases=["emojiinfo"])
 @implements(PrefixCommand, SlashCommand)
 async def emoji_info_cmd(ctx: Context):
+    """Information about an emoji"""
     emoji: Emoji = ctx.options.emoji
     if isinstance(emoji, UnicodeEmoji):
         return await ctx.respond("This is a default discord Emoji", reply=True)

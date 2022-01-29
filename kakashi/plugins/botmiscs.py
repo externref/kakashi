@@ -24,7 +24,7 @@ botmisc = Plugin(
 @botmisc.listener(StartedEvent)
 async def connect_to_prefix(event: StartedEvent):
     botmisc.bot.prefix_database = await aiosqlite.connect("database/guilds.db")
-    print("Connected to database !")
+    print("Connected to Prefix database !")
 
 
 @botmisc.command
