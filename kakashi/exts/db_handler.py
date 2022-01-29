@@ -5,22 +5,23 @@ from lightbulb.context import Context
 
 
 def initialise_databases() -> None:
+    """CREATING THE DATABASE FILES AND TABLES IN CASE THEY DONT EXIST ALREADY"""
     conn = sqlite3.connect("database/guilds.db")
     cursor = conn.cursor()
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS prefixes
-        (guild_id TEXT , prefix TEXT )
+        ( guild_id TEXT , prefix TEXT )
         """
     )
     conn.commit()
     conn.close()
-    conn = sqlite3.connect("database/reactionroles.db")
+    conn = sqlite3.connect("database/automations.db")
     cursor = conn.cursor()
     cursor.execute(
         """
-        CREATE TABLE IF NOT EXISTS rr_roles
-        (channel_id TEXT , message_id TEXT , reaction TEXT , role_id TEXT )
+        CREATE TABLE IF NOT EXISTS messagelogs
+        ( guild_id TEXT , channel_id TEXT )
         """
     )
     conn.commit()
@@ -28,6 +29,8 @@ def initialise_databases() -> None:
 
 
 class PrefixHandler:
+    """Used to handle prefixes!"""
+
     async def prefix_with_ctx(ctx: Context) -> str:
         async with ctx.bot.prefix_database.cursor() as cursor:
             await cursor.execute(
@@ -41,7 +44,7 @@ class PrefixHandler:
         if data:
             return data[1]
         else:
-            return "w!"
+            return "."
 
     async def prefix_setter(ctx: Context, new_prefix: str) -> None:
         async with ctx.bot.prefix_database.cursor() as cursor:
@@ -91,4 +94,44 @@ class PrefixHandler:
         if data:
             return data[1]
         else:
-            return "w!"
+            return "."
+
+
+class MessageLogDatabase:
+    """Class Managing Message Logs Database"""
+
+    async def get_data(ctx: Context):
+        async with ctx.bot.automation_database.cursor() as cursor:
+            await cursor.execute(
+                """
+                SELECT * FROM messagelogs
+                WHERE guild_id = ?
+                """,
+                (str(ctx.guild_id),),
+            )
+            data = await cursor.fetchone()
+        if data:
+            return data[1]
+
+    async def insert_data(ctx: Context, channel_id: int):
+        async with ctx.bot.automation_database.cursor() as cursor:
+            pre_existing = await MessageLogDatabase.get_data(ctx)
+            if pre_existing:
+                await cursor.execute(
+                    """
+                UPDATE messagelogs
+                SET channel_id = ?
+                WHERE guild_id = ?
+                """,
+                    (str(channel_id), str(ctx.guild_id)),
+                )
+            else:
+                await cursor.execute(
+                    """
+                    INSERT INTO messagelogs
+                    ( guild_id , channel_id )
+                    VALUES ( ? , ? )
+                    """,
+                    (str(ctx.guild_id), str(channel_id)),
+                )
+            await ctx.bot.automation_database.commit()
