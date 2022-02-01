@@ -8,7 +8,7 @@ from lightbulb.context import Context
 from lightbulb.app import BotApp
 from lightbulb.commands.base import OptionModifier
 from hikari.embeds import Embed
-from kakashi.exts import ColorHelper
+from kakashi.helpers import ColorHelper
 from aiohttp import ClientSession
 from random import choice
 

@@ -7,7 +7,7 @@ from hikari.events import (
     GuildBulkMessageDeleteEvent,
     GuildMessageUpdateEvent,
 )
-from kakashi.exts.db_handler import MessageLogDatabase
+from kakashi.helpers.db_handler import MessageLogDatabase
 
 event_listeners = Plugin(name="Events", description="An Listener Plugin")
 

@@ -1,7 +1,7 @@
 from lightbulb.app import BotApp, when_mentioned_or
 from lightbulb.checks import bot_has_guild_permissions
 from hikari.intents import Intents
-from .exts import initialise_databases, PrefixHandler
+from .helpers import initialise_databases, PrefixHandler
 from hikari.permissions import Permissions
 from datetime import datetime
 

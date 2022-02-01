@@ -11,7 +11,7 @@ from hikari.users import User
 from hikari.guilds import Member, Role
 from hikari.embeds import Embed
 from hikari.permissions import Permissions
-from kakashi.exts import ColorHelper, InfoEmbedHelper
+from kakashi.helpers import ColorHelper, InfoEmbedHelper
 from typing import Optional
 
 # from hikari.interactions.base_interactions import InteractionMember

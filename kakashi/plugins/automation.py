@@ -16,8 +16,8 @@ from hikari.channels import GuildTextChannel
 from hikari.embeds import Embed
 from hikari.events import StartedEvent
 from hikari.permissions import Permissions
-from kakashi.exts.hex import ColorHelper
-from kakashi.exts.db_handler import MessageLogDatabase
+from kakashi.helpers.hex import ColorHelper
+from kakashi.helpers.db_handler import MessageLogDatabase
 
 automation = Plugin(
     name="Automation", description="All automations you need for your server"

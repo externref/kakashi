@@ -1,5 +1,5 @@
 from .bot import *
-from . import exts
+from . import helpers
 import hikari, lightbulb
 
 Kakashi.hikari_version = hikari.__version__

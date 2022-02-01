@@ -11,7 +11,7 @@ from lightbulb.commands.base import OptionModifier
 from hikari.embeds import Embed
 from hikari.events import StartedEvent
 from hikari.permissions import Permissions
-from kakashi.exts import PrefixHandler, ColorHelper
+from kakashi.helpers import PrefixHandler, ColorHelper
 from datetime import datetime
 from platform import python_version
 
