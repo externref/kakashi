@@ -10,7 +10,8 @@ from lightbulb.commands.prefix import (
 from lightbulb.commands.slash import SlashCommand, SlashCommandGroup, SlashSubCommand
 from lightbulb.converters.special import EmojiConverter, TextableGuildChannelConverter
 from lightbulb.checks import has_guild_permissions
-from lightbulb.decorators import command, implements, add_checks, option
+from lightbulb.decorators import command, implements, add_checks, option, add_cooldown
+from lightbulb.cooldowns import UserBucket
 from hikari.channels import GuildTextChannel
 from hikari.embeds import Embed
 from hikari.events import StartedEvent
@@ -41,6 +42,7 @@ async def automation_base(ctx: Context):
 
 
 @automation.command
+@add_cooldown(10, 2, bucket=UserBucket)
 @add_checks(has_guild_permissions(Permissions.MANAGE_GUILD))
 @option(
     name="channel",
@@ -56,7 +58,7 @@ async def automation_base(ctx: Context):
 @implements(PrefixCommand, SlashCommand)
 async def command(ctx: Context):
     """Set message log"""
-    data = await MessageLogDatabase.get_data(ctx)
+    data = await MessageLogDatabase.get_data(ctx, ctx.bot)
     if not ctx.options.channel:
         if data:
             return await ctx.respond(
