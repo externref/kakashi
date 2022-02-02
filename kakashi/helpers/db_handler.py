@@ -1,8 +1,11 @@
 import sqlite3
-from hikari.messages import Message
+
 from lightbulb.app import BotApp
 from lightbulb.context import Context
+
+from hikari.messages import Message
 from hikari.events import GuildMessageDeleteEvent, GuildBulkMessageDeleteEvent
+
 from typing import Union
 
 
