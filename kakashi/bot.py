@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from lightbulb.app import BotApp, when_mentioned_or
 from lightbulb.checks import bot_has_guild_permissions
+
 from hikari.intents import Intents
-from .helpers import initialise_databases, PrefixHandler
 from hikari.permissions import Permissions
-from datetime import datetime
+
+from .helpers import initialise_databases, PrefixHandler
 
 
 class Kakashi(BotApp):
@@ -26,10 +29,6 @@ class Kakashi(BotApp):
                 Permissions.READ_MESSAGE_HISTORY,
             )
         )
-
-    @property
-    def my_emojis(self):
-        return {"wave": 898560210292068412}
 
 
 if __name__ == "__main__":
