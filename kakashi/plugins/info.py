@@ -1,18 +1,23 @@
-from hikari.emojis import Emoji, UnicodeEmoji, CustomEmoji
-from lightbulb.commands.slash import SlashCommand
-from lightbulb.plugins import Plugin
-from lightbulb.decorators import implements, command, option, add_checks, add_cooldown
-from lightbulb import checks
-from lightbulb.commands.prefix import PrefixCommand
-from lightbulb.context import Context
-from lightbulb.app import BotApp
-from lightbulb.cooldowns import UserBucket
-from hikari.users import User
-from hikari.guilds import Member, Role
-from hikari.embeds import Embed
-from hikari.permissions import Permissions
-from kakashi.helpers import ColorHelper, InfoEmbedHelper
 from typing import Optional
+
+from lightbulb import checks
+from lightbulb.app import BotApp
+from lightbulb.plugins import Plugin
+from lightbulb.context import Context
+from lightbulb.cooldowns import UserBucket
+from lightbulb.commands.slash import SlashCommand
+from lightbulb.commands.prefix import PrefixCommand
+from lightbulb.decorators import implements, command, option, add_checks, add_cooldown
+
+from hikari.users import User
+from hikari.embeds import Embed
+from hikari.messages import Message
+from hikari.guilds import Member, Role
+from hikari.permissions import Permissions
+from hikari.emojis import Emoji, UnicodeEmoji, CustomEmoji
+
+from kakashi.helpers import ColorHelper, InfoEmbedHelper
+
 
 # from hikari.interactions.base_interactions import InteractionMember
 
@@ -32,18 +37,18 @@ info_plugin = Plugin(
     ephemeral=True,
 )
 @implements(PrefixCommand, SlashCommand)
-async def av_cmd(ctx: Context):
+async def av_cmd(context: Context) -> None:
     """Avatar command"""
-    user = ctx.options.user or ctx.author
-    await ctx.respond(
+    user = context.options.user or context.author
+    await context.respond(
         embed=Embed(
             description=f"[Download]({user.avatar_url or user.default_avatar_url})",
             color=ColorHelper.blue,
         )
         .set_author(name=f"{user}'s AVATAR")
         .set_footer(
-            text=f"Requested by : {ctx.author}",
-            icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
+            text=f"Requested by : {context.author}",
+            icon=context.author.avatar_url or context.author.default_avatar_url,
         )
         .set_image(user.avatar_url or user.default_avatar_url)
     )
@@ -63,11 +68,11 @@ async def av_cmd(ctx: Context):
     aliases=["whois", "ui"],
 )
 @implements(PrefixCommand, SlashCommand)
-async def whois_cmd(ctx: Context):
+async def whois_cmd(context: Context) -> None:
     """Info about mentioned user"""
-    member = ctx.options.member or ctx.member
-    await ctx.respond(
-        embed=await InfoEmbedHelper.embed_for_member(ctx, member), reply=True
+    member = context.options.member or context.member
+    await context.respond(
+        embed=await InfoEmbedHelper.embed_for_member(context, member), reply=True
     )
 
 
@@ -80,10 +85,11 @@ async def whois_cmd(ctx: Context):
     name="roleinfo", description="Information about a mentioned role", aliases=["ri"]
 )
 @implements(PrefixCommand, SlashCommand)
-async def roleinfo_cmd(ctx: Context):
+async def roleinfo_cmd(context: Context) -> None:
     """Info about a role"""
-    await ctx.respond(
-        embed=await InfoEmbedHelper.embed_for_role(ctx, ctx.options.role), reply=True
+    await context.respond(
+        embed=await InfoEmbedHelper.embed_for_role(context, context.options.role),
+        reply=True,
     )
 
 
@@ -97,11 +103,11 @@ async def roleinfo_cmd(ctx: Context):
 )
 @command(name="emoji", description="Infor about an Custom Emoji", aliases=["emojiinfo"])
 @implements(PrefixCommand, SlashCommand)
-async def emoji_info_cmd(ctx: Context):
+async def emoji_info_cmd(context: Context) -> Optional[Message]:
     """Information about an emoji"""
-    emoji: Emoji = ctx.options.emoji
+    emoji: Emoji = context.options.emoji
     if isinstance(emoji, UnicodeEmoji):
-        return await ctx.respond("This is a default discord Emoji", reply=True)
+        return await context.respond("This is a default discord Emoji", reply=True)
     emoji: CustomEmoji
     created_at = f'<t:{int(emoji.created_at.timestamp())}:R> ||{emoji.created_at.strftime("%#d %B %Y")}||'
     embed = Embed(
@@ -111,11 +117,15 @@ async def emoji_info_cmd(ctx: Context):
     embed.set_author(name=f"{emoji.name} Emoji", icon=emoji.url)
     embed.set_image(emoji.url)
     embed.set_footer(
-        text=f"Requested by : {ctx.author}",
-        icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
+        text=f"Requested by : {context.author}",
+        icon=context.author.avatar_url or context.author.default_avatar_url,
     )
-    await ctx.respond(embed=embed, reply=True)
+    await context.respond(embed=embed, reply=True)
 
 
 def load(bot: BotApp):
     bot.add_plugin(info_plugin)
+
+
+def unload(bot: BotApp):
+    bot.remove_plugin(info_plugin)
