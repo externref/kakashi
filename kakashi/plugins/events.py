@@ -1,19 +1,25 @@
-from hikari import MessageUpdateEvent
-from lightbulb.plugins import Plugin
+from typing import Optional
+
 from lightbulb.app import BotApp
+from lightbulb.plugins import Plugin
+
 from hikari.embeds import Embed
 from hikari.events import (
     GuildMessageDeleteEvent,
     GuildBulkMessageDeleteEvent,
     GuildMessageUpdateEvent,
 )
+
+from hikari.messages import Message
+from hikari.errors import ForbiddenError
+
 from kakashi.helpers.db_handler import MessageLogDatabase
 
 event_listeners = Plugin(name="Events", description="An Listener Plugin")
 
 
 @event_listeners.listener(GuildMessageDeleteEvent)
-async def log_deleted_message(event: GuildMessageDeleteEvent):
+async def log_deleted_message(event: GuildMessageDeleteEvent) -> None:
     data = await MessageLogDatabase.get_data(event, event_listeners.bot)
     if not data:
         return
@@ -32,15 +38,34 @@ async def log_deleted_message(event: GuildMessageDeleteEvent):
         .add_field(name="Message ID", value=event.message_id, inline=True)
         .add_field(name="Channel", value=f"<#{event.channel_id}>", inline=True)
     )
-    await log_channel.send(embed=embed)
+    try:
+        await log_channel.send(embed=embed)
+    except ForbiddenError:
+        return
+
 
 @event_listeners.listener(GuildBulkMessageDeleteEvent)
-async def log_bulk_deleted_message(event : GuildBulkMessageDeleteEvent):
-    ...
+async def log_bulk_deleted_message(event: GuildBulkMessageDeleteEvent) -> None:
+    data = await MessageLogDatabase.get_data(event, event_listeners.bot)
+    if not data:
+        return
+    log_channel = event.get_guild().get_channel(int(data))
+    if not log_channel:
+        return
+    embed = Embed(
+        color=0xFFFFFF,
+        description=f"bulk Message Delete in <#{event.channel_id}>\n`{len(event.message_ids)}` messages deleted.",
+    )
+    try:
+        await log_channel.send(embed=embed)
+    except ForbiddenError:
+        return
 
 
 @event_listeners.listener(GuildMessageUpdateEvent)
-async def log_edited_messages(event: GuildMessageUpdateEvent):
+async def log_edited_messages(event: GuildMessageUpdateEvent) -> None:
+    if not event.old_message:
+        return
     if event.message.content == event.old_message.content:
         return
     data = await MessageLogDatabase.get_data(event, event_listeners.bot)
@@ -63,8 +88,15 @@ async def log_edited_messages(event: GuildMessageUpdateEvent):
         .add_field(name="Message ID", value=event.message_id, inline=True)
         .add_field(name="Channel", value=f"<#{event.channel_id}>", inline=True)
     )
-    await log_channel.send(embed=embed)
+    try:
+        await log_channel.send(embed=embed)
+    except ForbiddenError:
+        return
 
 
-def load(bot: BotApp):
+def load(bot: BotApp) -> None:
     bot.add_plugin(event_listeners)
+
+
+def unload(bot: BotApp) -> None:
+    bot.remove_plugin(event_listeners)
