@@ -1,8 +1,9 @@
-from typing import Union
+from hikari.guilds import Role
 from hikari.embeds import Embed
 from hikari.guilds import Member
+
 from lightbulb.context import Context
-from hikari.guilds import Role
+
 from .hex import ColorHelper
 
 
