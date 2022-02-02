@@ -1,21 +1,26 @@
 import aiosqlite
-from lightbulb.context import Context
+from typing import Optional
+
 from lightbulb.app import BotApp
 from lightbulb.plugins import Plugin
+from lightbulb.context import Context
 from lightbulb.commands.prefix import (
     PrefixCommand,
     PrefixCommandGroup,
     PrefixSubCommand,
 )
+from lightbulb.cooldowns import UserBucket
+from lightbulb.checks import has_guild_permissions
 from lightbulb.commands.slash import SlashCommand, SlashCommandGroup, SlashSubCommand
 from lightbulb.converters.special import EmojiConverter, TextableGuildChannelConverter
-from lightbulb.checks import has_guild_permissions
 from lightbulb.decorators import command, implements, add_checks, option, add_cooldown
-from lightbulb.cooldowns import UserBucket
-from hikari.channels import GuildTextChannel
+
 from hikari.embeds import Embed
+from hikari.messages import Message
 from hikari.events import StartedEvent
 from hikari.permissions import Permissions
+from hikari.channels import GuildTextChannel
+
 from kakashi.helpers.hex import ColorHelper
 from kakashi.helpers.db_handler import MessageLogDatabase
 
@@ -37,8 +42,8 @@ async def connect_to_prefix(event: StartedEvent):
     name="automation", description="Automation Commands for your server", hidden=True
 )
 @implements(PrefixCommand)
-async def automation_base(ctx: Context):
-    await ctx.bot.help_command.send_help(ctx, ctx.command.plugin.name)
+async def automation_base(context: Context):
+    await context.bot.help_command.send_help(context, context.command.plugin.name)
 
 
 @automation.command
@@ -56,36 +61,40 @@ async def automation_base(ctx: Context):
     description="Setup Logging Deleted messages in a channel",
 )
 @implements(PrefixCommand, SlashCommand)
-async def command(ctx: Context):
+async def msg_logs_command(context: Context) -> Optional[Message]:
     """Set message log"""
-    data = await MessageLogDatabase.get_data(ctx, ctx.bot)
-    if not ctx.options.channel:
+    data = await MessageLogDatabase.get_data(context, context.bot)
+    if not context.options.channel:
         if data:
-            return await ctx.respond(
+            return await context.respond(
                 embed=Embed(
                     description=f"Logged messages are being sent in <#{data}>",
                     color=ColorHelper.cyan,
                 ),
                 reply=True,
             )
-        return await ctx.bot.help_command.send_help(ctx, ctx.command.name)
-    if ctx.options.channel.id not in ctx.get_guild().get_channels():
-        return await ctx.respond(
+        return await context.bot.help_command.send_help(context, context.command.name)
+    if context.options.channel.id not in context.get_guild().get_channels():
+        return await context.respond(
             embed=Embed(
                 description=f"The channel must belong to the same server",
                 color=ColorHelper.red,
             ),
             reply=True,
         )
-    await MessageLogDatabase.insert_data(ctx, ctx.options.channel.id)
-    await ctx.respond(
+    await MessageLogDatabase.insert_data(context, context.options.channel.id)
+    await context.respond(
         embed=Embed(
-            description=f"Set message log channel to {ctx.options.channel.mention}",
+            description=f"Set message log channel to {context.options.channel.mention}",
             color=ColorHelper.green,
         ),
         reply=True,
     )
 
 
-def load(bot: BotApp):
+def load(bot: BotApp) -> None:
     bot.add_plugin(automation)
+
+
+def unload(bot: BotApp) -> None:
+    bot.remove_plugin(automation)
