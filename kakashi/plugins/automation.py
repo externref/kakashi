@@ -21,7 +21,7 @@ from hikari.events import StartedEvent
 from hikari.permissions import Permissions
 from hikari.channels import GuildTextChannel
 
-from kakashi.helpers.hex import ColorHelper
+from kakashi.helpers.custom_hex import ColorHelper
 from kakashi.helpers.db_handler import MessageLogDatabase
 
 automation = Plugin(
@@ -86,7 +86,7 @@ async def msg_logs_command(context: Context) -> Optional[Message]:
     await context.respond(
         embed=Embed(
             description=f"Set message log channel to {context.options.channel.mention}",
-            color=ColorHelper.green,
+            color=await ColorHelper.color_for_current(context, context.bot),
         ),
         reply=True,
     )
