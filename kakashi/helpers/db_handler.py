@@ -1,3 +1,4 @@
+from functools import cache
 import sqlite3
 
 from lightbulb.app import BotApp
@@ -19,6 +20,12 @@ def initialise_databases() -> None:
         ( guild_id TEXT , prefix TEXT )
         """
     )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS colors
+        (guild_id TEXT , color TEXT )
+        """
+    )
     conn.commit()
     conn.close()
     conn = sqlite3.connect("database/automations.db")
@@ -33,11 +40,17 @@ def initialise_databases() -> None:
     conn.close()
 
 
-class PrefixHandler:
+class PrefixHandlerImpl:
     """Used to handle prefixes!"""
 
-    async def prefix_with_ctx(ctx: Context) -> str:
-        async with ctx.bot.prefix_database.cursor() as cursor:
+    def __init__(self) -> None:
+        self.prefix_cache = {}
+
+    async def prefix_with_ctx(self, ctx: Context) -> str:
+        cached_prefix = self.prefix_cache.get(str(ctx.guild_id))
+        if cached_prefix:
+            return cached_prefix
+        async with ctx.bot.guild_database.cursor() as cursor:
             await cursor.execute(
                 """
                     SELECT * FROM prefixes
@@ -47,12 +60,14 @@ class PrefixHandler:
             )
             data = await cursor.fetchone()
         if data:
+            self.prefix_cache[str(ctx.guild_id)] = data[1]
             return data[1]
         else:
+            self.prefix_cache[str(ctx.guild_id)] = "."
             return "."
 
-    async def prefix_setter(ctx: Context, new_prefix: str) -> None:
-        async with ctx.bot.prefix_database.cursor() as cursor:
+    async def prefix_setter(self, ctx: Context, new_prefix: str) -> None:
+        async with ctx.bot.guild_database.cursor() as cursor:
             await cursor.execute(
                 """
                 SELECT * FROM prefixes
@@ -84,10 +99,14 @@ class PrefixHandler:
                         new_prefix,
                     ),
                 )
-            return await ctx.bot.prefix_database.commit()
+            self.prefix_cache[str(ctx.guild_id)] = new_prefix
+            return await ctx.bot.guild_database.commit()
 
-    async def prefix_getter(bot: BotApp, message: Message) -> str:
-        async with bot.prefix_database.cursor() as cursor:
+    async def prefix_getter(self, bot: BotApp, message: Message) -> str:
+        cached_prefix = self.prefix_cache.get(str(message.guild_id))
+        if cached_prefix:
+            return cached_prefix
+        async with bot.guild_database.cursor() as cursor:
             await cursor.execute(
                 """
                 SELECT * FROM prefixes
@@ -97,8 +116,10 @@ class PrefixHandler:
             )
             data = await cursor.fetchone()
         if data:
+            self.prefix_cache[str(message.guild_id)] = data[1]
             return data[1]
         else:
+            self.prefix_cache[str(message.guild_id)] = "."
             return "."
 
 
@@ -143,3 +164,6 @@ class MessageLogDatabase:
                     (str(ctx.guild_id), str(channel_id)),
                 )
             await ctx.bot.automation_database.commit()
+
+
+PrefixHandler = PrefixHandlerImpl()

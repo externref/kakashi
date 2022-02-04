@@ -4,7 +4,7 @@ from hikari.guilds import Member
 
 from lightbulb.context import Context
 
-from .hex import ColorHelper
+from .custom_hex import ColorHelper
 
 
 class InfoEmbedImpl:
@@ -12,11 +12,11 @@ class InfoEmbedImpl:
     Class helping for bot's info commands
     """
 
-    async def embed_for_member(self, ctx: Context, member: Member):
+    async def embed_for_member(self, context: Context, member: Member):
         perms = []
         for role in member.get_roles():
             perms += role.permissions
-        embed = Embed(color=ColorHelper.pink)
+        embed = Embed(color=await ColorHelper.color_for_current(context, context.bot))
         info_dict = {
             "Name in Server ": member.display_name,
             "User ID": int(member.id),
@@ -34,30 +34,33 @@ class InfoEmbedImpl:
         )
         embed.set_author(name=member.username)
         embed.set_footer(
-            text=f"Requested by : {ctx.author}",
-            icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
+            text=f"Requested by : {context.author}",
+            icon=context.author.avatar_url or context.author.default_avatar_url,
         )
         embed.set_thumbnail(member.avatar_url or member.default_avatar_url)
         embed.add_field(
             name="Permissions",
             value=await self.filter_perms(
-                " , ".join([str(perm) for perm in perms]), ctx, member
+                " , ".join([str(perm) for perm in perms]), context, member
             ),
         )
         return embed
 
-    async def embed_for_role(self, ctx: Context, role: Role):
-        embed = Embed(color=ColorHelper.red, title=f"{role.name} ROLE")
+    async def embed_for_role(self, context: Context, role: Role):
+        embed = Embed(
+            color=await ColorHelper.color_for_current(context, context.bot),
+            title=f"{role.name} ROLE",
+        )
         info_dict = {
             "Role ID": role.id,
             "Mention": "`" + role.mention + "`",
             "Role Color": role.color,
             "Created on": f'<t:{int(role.created_at.timestamp())}:R> `{role.created_at.strftime("%#d %B %Y")}`',
-            # TODO : 'Members with the role' : len([member for member in ctx.get_guild().get_members() if role in ctx.get_guild().get_member(member.id).get_roles()]),
+            # TODO : 'Members with the role' : len([member for member in context.get_guild().get_members() if role in context.get_guild().get_member(member.id).get_roles()]),
             "Hoisted": role.is_hoisted,
             "Mentionable": role.is_mentionable,
             "Perms on Role ": await self.filter_perms(
-                " , ".join([perm.name for perm in role.permissions]), ctx
+                " , ".join([perm.name for perm in role.permissions]), context
             ),
         }
         embed.description = "\n".join(
@@ -65,12 +68,14 @@ class InfoEmbedImpl:
             for key in info_dict.keys()
         )
         embed.set_footer(
-            text=f"Requested by : {ctx.author}",
-            icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
+            text=f"Requested by : {context.author}",
+            icon=context.author.avatar_url or context.author.default_avatar_url,
         )
         return embed
 
-    async def filter_perms(self, perm_str: str, ctx: Context, member: Member = None):
+    async def filter_perms(
+        self, perm_str: str, context: Context, member: Member = None
+    ):
         permissions = (
             (
                 perm_str.replace(", ADD_REACTIONS", "")
@@ -94,7 +99,7 @@ class InfoEmbedImpl:
 
         if "Administrator" in permissions:
             permissions = "Server Administrator"
-        if member and member.id == ctx.get_guild().owner_id:
+        if member and member.id == context.get_guild().owner_id:
             permissions = "Server Owner"
         if not permissions:
             permissions = "No Special Perms"
