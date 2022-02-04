@@ -44,7 +44,7 @@ async def meme_cmd(context: Context):
     embed = Embed(
         title=f"r/{data['subreddit']}",
         description=data["title"],
-        color=ColorHelper.blue,
+        color=await ColorHelper.color_for_current(context, context.bot),
         url=f"https://reddit.com/r/{data['subreddit']}",
     ).set_author()
     embed.set_image(data["url"])
@@ -67,7 +67,7 @@ async def neko_cmd(context: Context):
 
     await context.respond(
         embed=(
-            Embed(color=ColorHelper.pink)
+            Embed(color=await ColorHelper.color_for_current(context, context.bot))
             .set_image(data["url"])
             .set_author(
                 name="Here's a neko for you!",

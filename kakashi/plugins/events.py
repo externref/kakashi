@@ -13,7 +13,7 @@ from hikari.events import (
 from hikari.messages import Message
 from hikari.errors import ForbiddenError
 
-from kakashi.helpers.db_handler import MessageLogDatabase
+from kakashi.helpers import MessageLogDatabase, ColorHelper
 
 event_listeners = Plugin(name="Events", description="An Listener Plugin")
 
@@ -29,7 +29,12 @@ async def log_deleted_message(event: GuildMessageDeleteEvent) -> None:
     if not event.old_message.content:
         return
     embed = (
-        Embed(description=event.old_message.content, color=0xFFFFFF)
+        Embed(
+            description=event.old_message.content,
+            color=await ColorHelper.color_for_current(
+                event.get_guild(), event_listeners.bot
+            ),
+        )
         .set_author(
             name=str(event.old_message.author),
             icon=event.old_message.author.avatar_url
@@ -53,7 +58,9 @@ async def log_bulk_deleted_message(event: GuildBulkMessageDeleteEvent) -> None:
     if not log_channel:
         return
     embed = Embed(
-        color=0xFFFFFF,
+        color=await ColorHelper.color_for_current(
+            event.get_guild(), event_listeners.bot
+        ),
         description=f"bulk Message Delete in <#{event.channel_id}>\n`{len(event.message_ids)}` messages deleted.",
     )
     try:
@@ -66,7 +73,10 @@ async def log_bulk_deleted_message(event: GuildBulkMessageDeleteEvent) -> None:
 async def log_edited_messages(event: GuildMessageUpdateEvent) -> None:
     if not event.old_message:
         return
-    if event.message.content == event.old_message.content:
+    if (
+        event.message.content == event.old_message.content
+        or event.old_message.content == None
+    ):
         return
     data = await MessageLogDatabase.get_data(event, event_listeners.bot)
     if not data:
@@ -77,7 +87,9 @@ async def log_edited_messages(event: GuildMessageUpdateEvent) -> None:
     message_url = f"https://discord.com/channels/{event.old_message.guild_id}/{event.old_message.channel_id}/{event.old_message.id}"
     embed = (
         Embed(
-            color=0xFFFFFF,
+            color=await ColorHelper.color_for_current(
+                event.get_guild(), event_listeners.bot
+            ),
             description=f"[Jump to message]({message_url})\n**BEFORE** : {event.old_message.content[:2000]}\n**AFTER** : {event.message.content[:2000]} ",
         )
         .set_author(

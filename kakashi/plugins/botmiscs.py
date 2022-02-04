@@ -28,19 +28,8 @@ botmisc = Plugin(
 
 @botmisc.listener(StartedEvent)
 async def connect_to_prefix(event: StartedEvent) -> None:
-    botmisc.bot.prefix_database = await aiosqlite.connect("database/guilds.db")
+    botmisc.bot.guild_database = await aiosqlite.connect("database/guilds.db")
     print("Connected to Prefix database !")
-
-
-@botmisc.command
-@add_cooldown(10, 2, bucket=UserBucket)
-@command(name="ping", description="Sends bot's latency", aliases=["latency"])
-@implements(PrefixCommand, SlashCommand)
-async def ping(context: Context) -> None:
-    """Bot's Latency"""
-    await context.respond(
-        f"🏓 Pong `{round(context.bot.heartbeat_latency *1000 , 2)}` ms !"
-    )
 
 
 @botmisc.command
@@ -71,9 +60,53 @@ async def change_prefix(context: Context) -> Optional[Message]:
     await context.respond(
         embed=Embed(
             description=f"Changed Server Prefix to {prefix}",
-            color=ColorHelper.green,
+            color=await ColorHelper.color_for_current(context, context.bot),
         ),
         reply=True,
+    )
+
+
+@botmisc.command
+@add_cooldown(10, 2, bucket=UserBucket)
+@option(name="new_color", description="New Color", required=False)
+@command(name="botcolor", description="Color to appear in the embeds sent by the bot!")
+@implements(PrefixCommand, SlashCommand)
+async def change_bot_color(context: Context) -> Optional[Message]:
+    """Change color for bot"""
+    if not context.options.new_color:
+        return await context.respond(
+            embed=Embed(
+                description="This embed's color is your bot's color",
+                color=await ColorHelper.color_for_current(context, context.bot),
+            ),
+            reply=True,
+        )
+    if context.options.new_color not in ColorHelper.color_dict.keys():
+        return await context.respond(
+            embed=Embed(
+                color=await ColorHelper.color_for_current(context, context.bot),
+                description=f"**INVALID COLOR {context.options.new_color.upper()}** Color must be one from\n`{'` , `'.join(ColorHelper.color_dict.keys())}`",
+            ),
+            reply=True,
+        )
+    await ColorHelper.insert_color_for_guild(context, context.options.new_color)
+    await context.respond(
+        embed=Embed(
+            description=f"Set server's Embed color to `{context.options.new_color}`` !",
+            color=await ColorHelper.color_for_current(context, context.bot),
+        ),
+        reply=True,
+    )
+
+
+@botmisc.command
+@add_cooldown(10, 2, bucket=UserBucket)
+@command(name="ping", description="Sends bot's latency", aliases=["latency"])
+@implements(PrefixCommand, SlashCommand)
+async def ping(context: Context) -> None:
+    """Bot's Latency"""
+    await context.respond(
+        f"🏓 Pong `{round(context.bot.heartbeat_latency *1000 , 2)}` ms !"
     )
 
 
@@ -84,7 +117,7 @@ async def change_prefix(context: Context) -> Optional[Message]:
 async def botstats_command(context: Context) -> None:
     """Some stats and info about bot"""
     embed = (
-        Embed(color=ColorHelper.cyan)
+        Embed(color=await ColorHelper.color_for_current(context, context.bot))
         .set_author(
             name=f"{context.bot.get_me().username.upper()} BOT",
             icon=context.bot.get_me().avatar_url

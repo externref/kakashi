@@ -43,7 +43,7 @@ async def av_cmd(context: Context) -> None:
     await context.respond(
         embed=Embed(
             description=f"[Download]({user.avatar_url or user.default_avatar_url})",
-            color=ColorHelper.blue,
+            color=await ColorHelper.color_for_current(context, context.bot),
         )
         .set_author(name=f"{user}'s AVATAR")
         .set_footer(
@@ -111,7 +111,7 @@ async def emoji_info_cmd(context: Context) -> Optional[Message]:
     emoji: CustomEmoji
     created_at = f'<t:{int(emoji.created_at.timestamp())}:R> ||{emoji.created_at.strftime("%#d %B %Y")}||'
     embed = Embed(
-        color=ColorHelper.yellow,
+        color=await ColorHelper.color_for_current(context, context.bot),
         description=f"**Elasped name :** `{emoji.mention}`\n**Created :** {created_at}\n**Animated :** {emoji.is_animated}\n**ID :** {emoji.id} ",
     )
     embed.set_author(name=f"{emoji.name} Emoji", icon=emoji.url)
