@@ -16,7 +16,7 @@ from hikari.embeds import Embed
 from kakashi.helpers import ColorHelper
 
 
-fun_plugin = Plugin(name="Fun", description="Some fun commands")
+fun_plugin = Plugin(name="fun", description="Some fun commands")
 
 
 async def fetch_meme():

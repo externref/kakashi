@@ -22,7 +22,7 @@ from kakashi.helpers import ColorHelper, InfoEmbedHelper
 # from hikari.interactions.base_interactions import InteractionMember
 
 info_plugin = Plugin(
-    name="Info",
+    name="info",
     description="Module with various info commands about your server and users",
 )
 
