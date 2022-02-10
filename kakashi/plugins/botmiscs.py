@@ -5,6 +5,7 @@ from platform import python_version
 
 from lightbulb import checks
 from lightbulb.app import BotApp
+from lightbulb.ext.tasks import task
 from lightbulb.plugins import Plugin
 from lightbulb.context import Context
 from lightbulb.cooldowns import UserBucket
@@ -14,6 +15,7 @@ from lightbulb.commands.prefix import PrefixCommand
 from lightbulb.decorators import implements, command, option, add_checks, add_cooldown
 
 from hikari.embeds import Embed
+from hikari.presences import Activity, ActivityType, Status
 from hikari.messages import Message
 from hikari.events import StartedEvent
 from hikari.permissions import Permissions
@@ -21,15 +23,26 @@ from hikari.permissions import Permissions
 from kakashi.helpers import PrefixHandler, ColorHelper
 
 
-botmisc = Plugin(
-    name="Bot Related", description="Commands related to Bot setup and data"
-)
+botmisc = Plugin(name="misc", description="Commands related to Bot setup / No category")
 
 
 @botmisc.listener(StartedEvent)
 async def connect_to_prefix(event: StartedEvent) -> None:
+    status_task.start()
     botmisc.bot.guild_database = await aiosqlite.connect("database/guilds.db")
     print("Connected to Prefix database !")
+    botmisc.bot.invite_url = f"https://discord.com/api/oauth2/authorize?client_id={botmisc.bot.get_me().id}&permissions=3691367512&scope=bot%20applications.commands"
+
+
+@task(m=10)
+async def status_task() -> None:
+    await botmisc.bot.update_presence(
+        status=Status.IDLE,
+        activity=Activity(
+            name=f"/help | in {len(botmisc.bot.cache.get_available_guilds_view())} servers",
+            type=ActivityType.PLAYING,
+        ),
+    )
 
 
 @botmisc.command
@@ -68,6 +81,7 @@ async def change_prefix(context: Context) -> Optional[Message]:
 
 @botmisc.command
 @add_cooldown(10, 2, bucket=UserBucket)
+@add_checks(checks.has_guild_permissions(Permissions.MANAGE_GUILD))
 @option(name="new_color", description="New Color", required=False)
 @command(name="botcolor", description="Color to appear in the embeds sent by the bot!")
 @implements(PrefixCommand, SlashCommand)
@@ -132,7 +146,7 @@ async def botstats_command(context: Context) -> None:
         )
         .add_field(
             name=f"{context.bot.cache.get_emoji(929939525428445265)} Source Info",
-            value=f"⤷Bot Source : [sarthak-py/Winky](https://github.com/sarthak-py/Winky)\n⤷Code Style : black",
+            value=f"⤷Bot Source : [sarthak-py/kakashi](https://github.com/sarthak-py/kakashi)\n⤷Code Style : black",
         )
     )
     embed.description = f"```yaml\nUptime : {(datetime.now()-context.bot.boot_datetime)}\nServers : {len(context.bot.cache.get_guilds_view())}\nCached Users : {len(context.bot.cache.get_users_view())}\n\n```"
