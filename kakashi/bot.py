@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from lightbulb.ext import tasks
 from lightbulb.app import BotApp, when_mentioned_or
 from lightbulb.checks import bot_has_guild_permissions
 
@@ -17,6 +18,7 @@ class Kakashi(BotApp):
             prefix=when_mentioned_or(PrefixHandler.prefix_getter),
             help_slash_command=True,
         )
+        tasks.load(self)
         initialise_databases()
         self.boot_datetime = datetime.now()
         self.load_extensions("lightbulb.ext.filament.exts.superuser")
