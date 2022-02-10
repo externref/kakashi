@@ -36,6 +36,12 @@ def initialise_databases() -> None:
         ( guild_id TEXT , channel_id TEXT )
         """
     )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS welcomer 
+        ( guild_id TEXT , channel_id TEXT , message TEXT , color TEXT , welcome_type TEXT)
+        """
+    )
     conn.commit()
     conn.close()
 
@@ -164,6 +170,73 @@ class MessageLogDatabase:
                     (str(ctx.guild_id), str(channel_id)),
                 )
             await ctx.bot.automation_database.commit()
+
+
+class WelcomeDB:
+    async def get_guild_data(bot: BotApp, guild_id: str):
+        async with bot.guild_database.cursor() as cursor:
+            data = await cursor.execute(
+                """
+                    SELECT * FROM welcomer 
+                    WHERE guild_id = ?
+                    """,
+                (str(guild_id),),
+            )
+            guild_data = await data.fetchone()
+            if not guild_data:
+                return
+            return guild_data
+
+    async def update_or_insert_guild_data(
+        bot: BotApp,
+        guild_id: str,
+        channel_id: str,
+        message: str,
+        color: str = "blue",
+        type: str = "embedmessage",
+    ) -> None:
+        async with bot.guild_database.cursor() as cursor:
+            data = await cursor.execute(
+                """
+                    SELECT * FROM welcomer 
+                    WHERE guild_id = ?
+                    """,
+                (str(guild_id),),
+            )
+            is_data = await data.fetchone()
+            if is_data:
+                await cursor.execute(
+                    """
+                        UPDATE welcomer
+                        SET channel_id = ? , message = ? , color = ? , welcome_type = ?
+                        where guild_id = ?
+                        """,
+                    (
+                        str(channel_id),
+                        str(message),
+                        str(color),
+                        str(type),
+                        str(guild_id),
+                    ),
+                )
+                await bot.guild_database.commit()
+            else:
+                await cursor.execute(
+                    """
+                        INSERT INTO welcomer
+                        ( guild_id , channel_id , message , color , welcome_type )
+                        VALUES ( ? , ? , ? , ? , ?)
+                        """,
+                    (
+                        str(guild_id),
+                        str(channel_id),
+                        message,
+                        color,
+                        type,
+                    ),
+                )
+                await bot.guild_database.commit()
+            return
 
 
 PrefixHandler = PrefixHandlerImpl()
