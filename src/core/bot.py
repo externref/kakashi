@@ -22,6 +22,7 @@ class Kakashi(BotApp):
             help_slash_command=True,
         )
         self._boot_time = datetime.now()
+        self.load_extensions("lightbulb.ext.filament.exts.superuser")
         self.load_extensions_from("src/extensions")
 
     @property
