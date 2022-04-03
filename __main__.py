@@ -1,5 +1,4 @@
-from kakashi.bot import Kakashi
-from os import getenv
+from src.core.bot import Kakashi
 
 if __name__ == "__main__":
-    Kakashi(getenv("TOKEN")).run()
+    Kakashi().run()
