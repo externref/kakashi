@@ -1,3 +1,0 @@
-# Kakakshi
-
-Hikari rewrite.

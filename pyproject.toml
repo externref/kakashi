@@ -1,19 +1,17 @@
 [tool.poetry]
 name = "kakashi"
-version = "0.2.1"
-description = "A Discord Bot made with Python Hikari library"
-authors = ["sarthak-py"]
-license = "MIT"
+version = "0.1.0"
+description = "An Open source general purpose discord Bot written in hikari library using Python"
+authors = ["sarthak-py <shiva02939@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-hikari = "^2.0.0-alpha.106"
-hikari-lightbulb = "^2.2.0"
-hikari-miru = "^1.0.1"
+python = ">=3.9,<3.11"
+lightbulb-ext-filament = "^0.1.2"
 aiosqlite = "^0.17.0"
+python-dotenv = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.1.0"
+black = "^22.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
